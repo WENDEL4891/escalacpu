@@ -1,0 +1,7 @@
+INSERT INTO servicos (nome, data, turno) VALUES
+
+('TEN LUCAS', '2020-01-01', 1);
+('TEN JEFFERSON', '2020-01-01', 2),
+('TEN HELDER', '2020-01-01', 3),
+('TEN GONDIM', '2020-01-02', 1),
+('TEN MAIA', '2020-01-02', 2);

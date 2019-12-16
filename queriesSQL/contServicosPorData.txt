@@ -1,0 +1,1 @@
+SELECT data, COUNT(data) FROM servicos GROUP BY data;
