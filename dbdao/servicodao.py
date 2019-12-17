@@ -61,7 +61,7 @@ class ServicoDAO:
         servicosInList = cursor.fetchall()
         return servicosInList
         
-    def getDataComQtdDeServicosIncompleta(self):        
+    def get_data_com_qtde_de_servicos_incompleta(self):        
         data = self.primeiraDataDeServico
         qtdDeServicosPorDiaDict = self.getQtdDeServicosPorDia()
         datasList = list(qtdDeServicosPorDiaDict)

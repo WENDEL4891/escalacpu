@@ -1,70 +1,70 @@
-from dbdao import ServicoDAO, FeriadoDAO
+from dbdao import servicodao, feriadodao
 from db import Connection
 import datetime
 import config
 
 class Escalar:
-    def getDiasETurnosParaEscalar(self):
-        servicoDao = ServicoDAO()        
-        primeiraDataIncompleta = servicoDao.getDataComQtdDeServicosIncompleta()        
-        diaDaSemanaNum = primeiraDataIncompleta.weekday() # 0 para segunda até 6 para domingo
+    def get_dias_e_turnos_para_escalar(self):
+        servicodao_instance = servicodao.ServicoDAO()        
+        primeira_data_incompleta = servicodao_instance.get_data_com_qtde_de_servicos_incompleta()
+        dia_da_semana_num = primeira_data_incompleta.weekday() # 0 para segunda até 6 para domingo
         
-        segNoPeriodo = primeiraDataIncompleta - datetime.timedelta(days=diaDaSemanaNum)
-        domNoPeriodo = segNoPeriodo + datetime.timedelta(days=6)
-        todasAsDatasDoPeriodo = list()
+        seg_no_periodo = primeira_data_incompleta - datetime.timedelta(days=dia_da_semana_num)
+        dom_no_periodo = seg_no_periodo + datetime.timedelta(days=6)
+        todas_as_datas_do_periodo = list()
 
         for num in range(7):            
-            todasAsDatasDoPeriodo.append(segNoPeriodo + datetime.timedelta(days=num))
+            todas_as_datas_do_periodo.append(seg_no_periodo + datetime.timedelta(days=num))
         
         connection = Connection()
         conn = connection.getConnection()
         cursor = conn.cursor()
 
-        getTurnosParaEscalarQuery = "SELECT data, SUM(turno), COUNT(data) FROM servicos WHERE data BETWEEN '" +\
-            datetime.datetime.strftime(segNoPeriodo, '%Y-%m-%d') +\
-            "' AND '" + datetime.datetime.strftime(domNoPeriodo, '%Y-%m-%d') + "' GROUP BY data"
+        get_turnos_para_escalar_query = "SELECT data, SUM(turno), COUNT(data) FROM servicos WHERE data BETWEEN '" +\
+            datetime.datetime.strftime(seg_no_periodo, '%Y-%m-%d') +\
+            "' AND '" + datetime.datetime.strftime(dom_no_periodo, '%Y-%m-%d') + "' GROUP BY data"
         
-        cursor.execute(getTurnosParaEscalarQuery)
+        cursor.execute(get_turnos_para_escalar_query)
         results = cursor.fetchall()
-        turnosParaEscalarPorData = dict()
+        turnos_para_escalar_por_data = dict()
         for result in results:
-            turnosParaEscalarPorData[datetime.datetime.strptime(result[0], '%Y-%m-%d')] = self.getDiasParaEscalar(result[1], result[2])
+            turnos_para_escalar_por_data[datetime.datetime.strptime(result[0], '%Y-%m-%d')] = self.get_turnos_para_escalar(result[1], result[2])
         
-        for data in todasAsDatasDoPeriodo:            
-            if data not in turnosParaEscalarPorData:
-                turnosParaEscalarPorData[data] = [1, 2, 3]        
+        for data in todas_as_datas_do_periodo:            
+            if data not in turnos_para_escalar_por_data:
+                turnos_para_escalar_por_data[data] = [1, 2, 3]        
         
-        return turnosParaEscalarPorData
+        return turnos_para_escalar_por_data
 
-    def getDiasParaEscalar(self, somaTurnos, contDatas):        
-        if somaTurnos == 0:
+    def get_turnos_para_escalar(self, soma_turnos, cont_datas):        
+        if soma_turnos == 0:
             return [1, 2, 3]
 
-        elif somaTurnos == 1:
+        elif soma_turnos == 1:
             return [2, 3]
 
-        elif somaTurnos == 2:
+        elif soma_turnos == 2:
             return [1, 3]
 
-        elif somaTurnos == 3:
-            if contDatas == 1:
+        elif soma_turnos == 3:
+            if cont_datas == 1:
                 return [1, 2]
-            elif contDatas == 2:
+            elif cont_datas == 2:
                 return [3]            
 
-        elif somaTurnos == 4:
+        elif soma_turnos == 4:
             return [2]
 
-        elif somaTurnos == 5:
+        elif soma_turnos == 5:
             return [1]
         
-        elif somaTurnos == 6:
+        elif soma_turnos == 6:
             return[]
        
-    def escalarSeg_Sex(self):
-        diasETurnosDict = self.getDiasETurnosParaEscalar()
+    def escalar_seg_a_dom(self):
+        diasETurnosDict = self.get_dias_e_turnos_para_escalar()
         
-        feriadoDao = FeriadoDAO()
+        feriadodao_instance = feriadodao.FeriadoDAO()
         apenasDias = list(diasETurnosDict)
         feriadosNoPeriodo = feriadoDao.getFeriadosEmPeriodo(min(apenasDias), max(apenasDias))
         

@@ -1,6 +1,6 @@
 from datetime import datetime
 from .enums import TipoImpedimentoEnum
-import dbdao
+from dbdao import cpudao
 from services import functions
 
 
@@ -10,9 +10,8 @@ class Impedimento:
         self.nome_de_guerra = nome_de_guerra
         self.tipo = tipo
         self.data_inicio = data_inicio
-        self.data_fim = data_inicio
-        self.observacao = observacao
-    
+        self.data_fim = data_fim
+        self.observacao = observacao    
 
     @property
     def nome_de_guerra(self):
@@ -36,7 +35,7 @@ class Impedimento:
     
     @nome_de_guerra.setter
     def nome_de_guerra(self, nome_de_guerra):
-        cpus = dbDAO.CpuDAO().getCpus()      
+        cpus = cpudao.CpuDAO().get_cpus()      
         nomes_de_guerra = [cpu[3] for cpu in cpus]
         if not isinstance(nome_de_guerra, str):
             raise TypeError('Nome de guerra deve ser do tipo string.')        
@@ -78,5 +77,5 @@ class Impedimento:
         return {'nome_de_guerra': self.nome_de_guerra,
                 'tipo': self.tipo,
                 'data_inicio': self.data_inicio,
-                'data_fim': self.data_inicio,
+                'data_fim': self.data_fim,
                 'observacao': self.observacao}

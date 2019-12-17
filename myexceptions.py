@@ -3,3 +3,6 @@ class IntegrityError(Exception):
 
 class BdOperationError(Exception):
     pass
+
+class LogicException(Exception):
+    pass

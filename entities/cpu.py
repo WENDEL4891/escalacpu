@@ -62,9 +62,10 @@ class Cpu:
         if not isinstance(nome_de_guerra, str):
             raise TypeError('Nome de guerra deve ser do tipo string.')
         if not len(set(nome_de_guerra.split(' ')).intersection(self.nome_completo.split(' '))):
+            print(nome_completo)
+            print(nome_de_guerra)
             raise ValueError('O nome de guerra deve estar contindo no nome completo.')
-        self.__nome_de_guerra = nome_de_guerra.upper()
-        
+        self.__nome_de_guerra = nome_de_guerra.upper()        
 
     @funcao.setter
     def funcao(self, funcao):
@@ -84,20 +85,35 @@ class Cpu:
 
     @ano_base.setter
     def ano_base(self, ano_base):
-        if not isinstance(ano_base, int):
-            raise TypeError('Ano base deve ser do tipo inteiro.')
-        if not 1980 <= ano_base <= datetime.datetime.now().year:
-            raise ValueError('Ano base inválido.')
-        self.__ano_base = ano_base
-        
-
+        if ano_base == '':
+            self.__ano_base = None
+        else:
+            if not isinstance(ano_base, int):            
+                try:
+                    ano_base = int(ano_base)
+                except ValueError:
+                    raise ValueError('O parâmetro ano_base deve receber um valor numérico.')        
+            if not 1980 <= ano_base <= datetime.datetime.now().year:
+                raise ValueError('Ano base inválido.')
+            self.__ano_base = ano_base
     
     def __repr__(self):
         return {
-            'P/G': self.pg,
-            'Nome completo': self.nome_completo,
-            'Nome de guerra': self.nome_de_guerra,
-            'Função': self.funcao,
-            'Curso': self.curso,
-            'Ano base': self.ano_base
+            'pg': self.pg,
+            'nome_completo': self.nome_completo,
+            'nome_de_guerra': self.nome_de_guerra,
+            'funcao': self.funcao,
+            'curso': self.curso,
+            'ano_base': self.ano_base
         }
+
+    def __eq__(self, other_cpu):
+        if other_cpu == None:
+            return False
+        pg_eq = self.pg == other_cpu.pg
+        nome_completo_eq = self.nome_completo == other_cpu.nome_completo
+        nome_de_guerra_eq = self.nome_de_guerra == other_cpu.nome_de_guerra
+        funcao_eq = self.funcao == other_cpu.funcao
+        curso_eq = self.curso == other_cpu.curso
+        ano_base_eq = self.ano_base == other_cpu.ano_base        
+        return  pg_eq and nome_completo_eq and nome_de_guerra_eq and funcao_eq and curso_eq and ano_base_eq
