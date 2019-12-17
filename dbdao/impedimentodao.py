@@ -14,16 +14,16 @@ class ImpedimentoDAO:
                 
         try:
             connection_instance = connection.Connection()
-            conn = connection_instance.getConnection()
+            conn = connection_instance.get_connection()
             cursor = conn.cursor()
             
-            dtaInFormat = datetime.strftime(impedimento_instance.data_inicio, '%Y-%m-%d')
-            dtaFimFormat = datetime.strftime(impedimento_instance.data_fim, '%Y-%m-%d')
+            dta_in_format = datetime.strftime(impedimento_instance.data_inicio, '%Y-%m-%d')
+            dta_fim_format = datetime.strftime(impedimento_instance.data_fim, '%Y-%m-%d')
 
             primCond = "nome_de_guerra = '" + impedimento_instance.nome_de_guerra + "'"
-            segCond = "'" + dtaInFormat + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"            
-            terCond = "DATE(data_inicio) BETWEEN '" + dtaInFormat + "' AND '" + dtaFimFormat + "'"
-            quarCond = "DATE(data_fim) BETWEEN '" + dtaInFormat + "' AND '" + dtaFimFormat + "'"
+            segCond = "'" + dta_in_format + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"            
+            terCond = "DATE(data_inicio) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
+            quarCond = "DATE(data_fim) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
             condicoes = "(" + primCond + ") AND ( (" + segCond + ") OR (" + terCond + ") OR (" + quarCond + ") )"
 
             selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos WHERE " + condicoes
@@ -68,7 +68,7 @@ class ImpedimentoDAO:
 
         try:
             connection_instance = connection.Connection()
-            conn = connection_instance.getConnection()
+            conn = connection_instance.get_connection()
             cursor = conn.cursor()
            
             nome_de_guerra_format = impedimento_para_ser_removido.nome_de_guerra
@@ -165,7 +165,7 @@ class ImpedimentoDAO:
                 
         try:            
             connection_instance = connection.Connection()
-            conn = connection_instance.getConnection()
+            conn = connection_instance.get_connection()
             cursor = conn.cursor()
             cursor.execute(updateQuery)
             conn.commit()
@@ -198,11 +198,13 @@ class ImpedimentoDAO:
         data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
         data_inicio_format = datetime.strftime(data_inicio_datetime, '%Y-%m-%d')               
         
-        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM impedimentos WHERE nome_de_guerra  = '" + nome_de_guerra_format + "' AND  data_inicio = '" + data_inicio_format + "'"        
+        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM \
+            impedimentos WHERE nome_de_guerra  = '" + nome_de_guerra_format + "' AND  \
+            data_inicio = '" + data_inicio_format + "'"        
         
         try:           
             connection_instance = connection.Connection()
-            conn = connection_instance.getConnection()            
+            conn = connection_instance.get_connection()            
             cursor = conn.cursor()
             
             cursor.execute(selectQuery)
@@ -223,52 +225,59 @@ class ImpedimentoDAO:
             if 'conn' in locals():
                 conn.close()
 
-    def get_impedimentos(self, data_inicio='', data_fim=''):
-        if not type(data_inicio) == type(data_fim) == str:
+    def get_impedimentos_from_date(self, data_inicio='', data_fim=''):
+        if not isinstance(data_inicio, str) and isinstance(data_fim, str):
             raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser strings.')
         
         if len(data_inicio) != len(data_fim):
             raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')
         
-        complementoQuery = ''
-        if len(data_inicio):
-            try:
-                if datetime.strptime(data_inicio, '%d/%m/%Y') > datetime.strptime(data_fim, '%d/%m/%Y'):
-                    raise ValueError('A data fim deve ser superior a data de início.')
-            except ValueError:
-                raise ValueError('Informe as datas no formato dd/mm/AAAA. Ou não informe nenhuma data.')
-            
-            dia = data_inicio[:2]
-            mes = data_inicio[3:5]
-            ano = data_inicio[6:]
-            dtaInFormat = ano + '-' + mes + '-' + dia        
-
-            dia = data_fim[:2]
-            mes = data_fim[3:5]
-            ano = data_fim[6:]
-            dtaFimFormat = ano + '-' + mes + '-' + dia        
+        data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
+        data_fim_datetime = functions.date_str_to_datetime(data_fim)
         
-        primCond = "'" + dtaInFormat + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"        
-        segCond = "DATE(data_inicio) BETWEEN '" + dtaInFormat + "' AND '" + dtaFimFormat + "'"
-        terCond = "DATE(data_fim) BETWEEN '" + dtaInFormat + "' AND '" + dtaFimFormat + "'"
-        condicoes = "(" + primCond + ") OR (" + segCond + ") OR (" + terCond + ")"
+        if len(data_inicio):            
+            if data_inicio_datetime > data_fim_datetime:
+                raise ValueError('A data fim deve ser superior a data de início.')
+                                    
+        dta_in_format = datetime.strftime(data_inicio_datetime)
+        dta_fim_format = datetime.strftime(data_fim_datetime)
 
-        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos WHERE " + condicoes          
+        if 'dta_in_format' in locals():
+            primCond = "'" + dta_in_format + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"        
+            segCond = "DATE(data_inicio) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
+            terCond = "DATE(data_fim) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
+            condicoes = " WHERE (" + primCond + ") OR (" + segCond + ") OR (" + terCond + ")"
+        else:
+            condicoes = ''
+
+        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos" + condicoes          
         
         try:
             connection_instance = connection.Connection()
-            conn = connection_instance.getConnection()
+            conn = connection_instance.get_connection()
             cursor = conn.cursor()            
 
             cursor.execute(selectQuery)
-            result = cursor.fetchall()            
-            conn.commit()
-
+            results = cursor.fetchall()
+            # TESTAR O VALOR DE cursor.rowcount QUANDO HOUVER RESULTADOS
+            if len(result):
+                impedimentos = list()
+                for result in results:
+                    impedimento_instance = impedimento.Impedimento(
+                        result[0],
+                        result[1],
+                        result[2],
+                        result[3],
+                        result[4]
+                    )
+                    impedimentos.append(impedimento_instance)
+                return impedimentos
+            else:
+                return list()
         except sqlite3.OperationalError as err:
             print('Erro de Banco de Dados: ')
             print(err)
         finally:
-            conn.close()
-            if 'result' in locals():
-                return result
-            return list()
+            if 'conn' in locals():
+                conn.close()
+            

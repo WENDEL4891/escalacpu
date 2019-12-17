@@ -9,7 +9,7 @@ class FeriadoDAO:
             feriado = Feriado(data, tipo)
             
             connection = Connection()
-            conn = connection.getConnection()
+            conn = connection.get_connection()
             cursor = conn.cursor()
             
             addQuery = "INSERT INTO feriados VALUES (?, ?)"
@@ -26,7 +26,7 @@ class FeriadoDAO:
         dataFinalFormatada = datetime.strftime(dataFinal, '%Y-%m-%d')
         
         connection = Connection()
-        conn = connection.getConnection()
+        conn = connection.get_connection()
         cursor = conn.cursor()
 
         getFeriadoQuery = "SELECT * FROM feriados WHERE data >= '" + dataInicialFormatada +"' AND data <= '" + dataFinalFormatada + "'"

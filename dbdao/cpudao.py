@@ -10,7 +10,7 @@ class CpuDAO:
             cpu_instance = cpu.Cpu(pg, nome_completo, nome_de_guerra, funcao, curso, ano_base)
             
             connection_conn = connection.Connection()
-            conn = connection_conn.getConnection()
+            conn = connection_conn.get_connection()
             cursor = conn.cursor()
             
             addQuery = "INSERT INTO CPUs (pg, nome_completo, nome_de_guerra, funcao, curso, ano_base) VALUES (?, ?, ?, ?, ?, ?)"
@@ -42,7 +42,7 @@ class CpuDAO:
             raise ValueError('Não há cpu com o nome de guerra informado (' + nome_de_guerra + '), para remoção.')
         try:
             connection_conn = connection.Connection()
-            conn = connection_conn.getConnection()
+            conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
             rmQuery = "DELETE FROM CPUs WHERE nome_de_guerra = '" + cpu_para_ser_removido.nome_de_guerra + "'"
@@ -104,7 +104,7 @@ class CpuDAO:
                 
         try:            
             connection_conn = connection.Connection()
-            conn = connection_conn.getConnection()
+            conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
             cursor.execute(update_cpu_query)
@@ -116,7 +116,7 @@ class CpuDAO:
                 for key, value in antes_dict.items():
                     if antes_dict[key] != depois_dict[key]:
                         print(key, value, sep=' > ', end='')
-                        print(' | atualizado para ' + str(depois_dict[key]), sep=': ')
+                        print(' # atualizado para ' + str(depois_dict[key]), sep=': ')
                     else:
                         print(key, value, sep=' > ')
                 print('*' * 30)
@@ -134,7 +134,7 @@ class CpuDAO:
             raise ValueError('O parâmetro nome_de_guerra deve receber uma string.')            
         try:
             connection_conn = connection.Connection()
-            conn = connection_conn.getConnection()
+            conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
             selectCpuQuery = "SELECT * FROM CPUs WHERE nome_de_guerra = '" + nome_de_guerra.upper() + "'"
@@ -156,7 +156,7 @@ class CpuDAO:
     def get_cpus(self):
         try:
             connection_conn = connection.Connection()
-            conn = connection_conn.getConnection()
+            conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
             selectCpusQuery = "SELECT * FROM CPUs"
@@ -166,6 +166,7 @@ class CpuDAO:
             cpus = list()
             for registro in result:
                 cpu_instance = cpu.Cpu(registro[1], registro[2], registro[3], registro[4], registro[5], registro[6])
+                cpus.append(cpu_instance)
         except sqlite3.OperationalError as err:
             print('Erro de Banco de Dados: ')
             print(err)

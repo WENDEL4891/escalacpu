@@ -3,6 +3,9 @@ from .enums import TipoImpedimentoEnum
 from dbdao import cpudao
 from services import functions
 
+cpus = cpudao.CpuDAO().get_cpus()      
+nomes_de_guerra = [cpu_instance.nome_de_guerra for cpu_instance in cpus]
+tipos = [member.value for name, member in TipoImpedimentoEnum.__members__.items()]
 
 
 class Impedimento:    
@@ -35,8 +38,6 @@ class Impedimento:
     
     @nome_de_guerra.setter
     def nome_de_guerra(self, nome_de_guerra):
-        cpus = cpudao.CpuDAO().get_cpus()      
-        nomes_de_guerra = [cpu[3] for cpu in cpus]
         if not isinstance(nome_de_guerra, str):
             raise TypeError('Nome de guerra deve ser do tipo string.')        
         if not nome_de_guerra.upper() in nomes_de_guerra:
@@ -45,7 +46,6 @@ class Impedimento:
     
     @tipo.setter
     def tipo(self, tipo):
-        tipos = [member.value for name, member in TipoImpedimentoEnum.__members__.items()]
         if not isinstance(tipo, str):
             raise TypeError('Tipo deve ser do tipo string.')        
         if not tipo.upper() in tipos:

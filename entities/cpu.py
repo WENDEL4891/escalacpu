@@ -56,11 +56,11 @@ class Cpu:
         self.__nome_completo = nome_completo.upper()        
 
     @nome_de_guerra.setter
-    def nome_de_guerra(self, dictNomes):
+    def nome_de_guerra(self, dict_nomes):
+        if not isinstance(dict_nomes['nome_de_guerra'], str) and isinstance(dict_nomes['nome_completo'], str):
+            raise ValueError('Nomes devem ser do tipo string.')
         nome_de_guerra = dictNomes['nome_de_guerra'].upper()
-        nome_completo = dictNomes['nome_completo'].upper()
-        if not isinstance(nome_de_guerra, str):
-            raise TypeError('Nome de guerra deve ser do tipo string.')
+        nome_completo = dictNomes['nome_completo'].upper()        
         if not len(set(nome_de_guerra.split(' ')).intersection(self.nome_completo.split(' '))):
             print(nome_completo)
             print(nome_de_guerra)
