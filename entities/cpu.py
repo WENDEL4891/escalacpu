@@ -116,3 +116,12 @@ class Cpu:
         curso_eq = self.curso == other_cpu.curso
         ano_base_eq = self.ano_base == other_cpu.ano_base        
         return  pg_eq and nome_completo_eq and nome_de_guerra_eq and funcao_eq and curso_eq and ano_base_eq
+
+    def __str__(self):
+        return\
+            'P/G: ' +  self.pg +\
+            ' | Nome completo: ' + self.nome_completo +\
+            ' | Nome de guerra: ' + self.nome_de_guerra +\
+            ' | Função: ' + self.funcao +\
+            ' | Curso: ' + self.curso +\
+            ' | Ano base: ' + str(self.ano_base)

@@ -1,40 +1,77 @@
 import datetime
-import db
-import entities
+from db import connection
+from entities import servico
 import config
 import sys
 
 
 class ServicoDAO:
     def __init__(self):
-        self.primeiraDataDeServico = datetime.datetime.strptime(config.primeiraData, '%d/%m/%Y')
+        self.primeiraDataDeServico = datetime.datetime.strptime(config.primeira_data, '%d/%m/%Y')
 
-    def servicoAdd(self, nome, data, turno):        
-        servico = entities.servico.Servico(nome, data, turno)
-        connection = db.connection.db.connection.Connection()
-        conn = connection.getConnection()
-        cursor = conn.cursor()
+    def servico_add(self, nome_de_guerra, data, turno, nome_estagio=None):        
+        serv_inst = servico.Servico(nome_de_guerra, data, turno, nome_estagio)
 
-        insertServico = 'INSERT INTO servicos (nome, data, turno) VALUES (?, ?, ?)'
-        cursor.execute(insertServico, (servico.nome, servico.data, servico.turno))
-        conn.commit()
-        conn.close()
+        try:
+            conn_inst = connection.Connection()
+            conn = conn_inst.get_connection()
+            cursor = conn.cursor()
+
+            insertServico = 'INSERT INTO servicos VALUES (?, ?, ?, ?)'
+            params = (serv_inst.nome_de_guerra, serv_inst.data, serv_inst.turno, serv_inst.nome_estagio)
+            cursor.execute(insertServico, params)
+            conn.commit()
+            if cursor.rowcount == 1:
+                print('Serviço inserido no banco de dados com sucesso: ')
+                print(serv_inst)
+                print('\'' * 40)
+            else:
+                print('O serviço não foi inserido no banco de dados. Causa não identificada.')
+        except:
+            print('Erro ao tentar inserir o serviço no Bando de Dados')
+            print('Tipo do erro: ', sys.exc_info()[0], sep=' > ')
+            print('Descrição do erro: ', sys.exc_info()[1], sep=' > ')
+            print(serv_inst)
+            print('x' * 40)            
+            raise
+        finally:
+            if 'conn' in locals():
+                conn.close()
     
-    def getServicos(self):
-        connection = db.connection.Connection()
-        conn = connection.getConnection()
-        cursor = conn.cursor()
+    def get_servicos(self):
+        try:
+            conn_inst = connection.Connection()
+            conn = conn_inst.get_connection()
+            cursor = conn.cursor()
 
-        getServicosQuery = 'SELECT nome, data, turno FROM servicos'
+            getServicosQuery = 'SELECT * FROM servicos'
 
-        cursor.execute(getServicosQuery)
-        results = cursor.fetchall()
-        conn.close()
-        return results
+            cursor.execute(getServicosQuery)
+            results = cursor.fetchall()
+            servicos_list = list()
+            if len(results):                
+                for result in results:
+                    serv_inst = servico.Servico(
+                        result[0],
+                        result[1],
+                        result[2],
+                        result[3],
+                    )
+                    servicos_list.append(serv_inst)
+            return servicos_list            
+        except:
+            print('Erro ao tentar buscar serviços no Banco de dados.')
+            print('Tipo do erro: ', sys.exc_info()[0], sep=' > ')
+            print('Descrição do erro: ', sys.exc_info()[1], sep=' > ')            
+            print('x' * 40)            
+            raise
+        finally:
+            if 'conn' in locals():
+                conn.close()
     
-    def getQtdDeServicosPorDia(self):
-        connection = db.connection.Connection()
-        conn = connection.getConnection()
+    def get_qtd_de_servicos_por_dia(self):
+        conn_inst = connection.Connection()
+        conn = conn_inst.get_connection()
         cursor = conn.cursor()
 
         getContagem = "SELECT data, SUM(turno), COUNT(data) FROM servicos GROUP BY data;"
@@ -47,12 +84,12 @@ class ServicoDAO:
             qtdServicosPorDiaDict[datetime.datetime.strptime(el[0], '%Y-%m-%d')] = {'somaTurnos':el[1], 'contDatas': el[2]}
         return qtdServicosPorDiaDict
     
-    def getServicosToData(self, data):
+    def get_servicos_from_data(self, data):
         data = datetime.datetime.strptime(data, '%d/%m/%Y')
         dataFormat = datetime.datetime.strftime(data, '%Y-%m-%d')
         print(dataFormat)
-        connection = db.connection.Connection()
-        conn = connection.getConnection()
+        conn_inst = connection.Connection()
+        conn = conn_inst.get_connection()
         cursor = conn.cursor()
 
         getSericosToDataQuery = "SELECT nome, data, turno FROM servicos WHERE data <= DATE("+ "'" + dataFormat + "'" +")"

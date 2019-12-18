@@ -46,21 +46,23 @@ class CpuDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            rmQuery = "DELETE FROM CPUs WHERE nome_de_guerra = '" + cpu_para_ser_removido.nome_de_guerra + "'"
+            rm_query = "DELETE FROM CPUs WHERE nome_de_guerra = '" + cpu_para_ser_removido.nome_de_guerra + "'"
 
-            cursor.execute(rmQuery)                       
+            cursor.execute(rm_query)                       
             conn.commit()
             if cursor.rowcount:
                 print('CPU removido com sucesso: ')
-                for key, value in cpu_para_ser_removido.__repr__().items():
-                    print(key, value, sep= ' > ')
+                print(cpu_para_ser_removido)
                 print('\'' * 40)
             else:
                 print('Não foi realizada a remoção do cpu (' + cpu_para_ser_removido.nome_de_guerra + '). Causa não identificada.')
 
         except sqlite3.OperationalError as err:
-            print('Erro de Banco de Dados: ')
-            print(err)        
+            print('Erro ao tentar excluir do banco de dados o cpu : ')
+            print(cpu_para_ser_removido)
+            print('Tipo do erro: ', sys.exc_info()[0], sep=' > ')
+            print('Descrição do erro: ', sys.exc_info()[1], sep=' > ')
+            raise
         finally:
             if 'conn' in locals():
                 conn.close()
