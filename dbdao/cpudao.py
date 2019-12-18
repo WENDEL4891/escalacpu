@@ -22,6 +22,7 @@ class CpuDAO:
                 print('Novo CPU cadastrado com sucesso: ')
                 for key, value in cpu_instance.__repr__().items():
                     print(key, value, sep=' > ')
+                print('\'' * 40 )
             else:
                 raise myexceptions.BdOperationError('O cadastro não foi realizado. Causa não identificada.')
 
@@ -53,6 +54,7 @@ class CpuDAO:
                 print('CPU removido com sucesso: ')
                 for key, value in cpu_para_ser_removido.__repr__().items():
                     print(key, value, sep= ' > ')
+                print('\'' * 40)
             else:
                 print('Não foi realizada a remoção do cpu (' + cpu_para_ser_removido.nome_de_guerra + '). Causa não identificada.')
 
@@ -119,7 +121,7 @@ class CpuDAO:
                         print(' # atualizado para ' + str(depois_dict[key]), sep=': ')
                     else:
                         print(key, value, sep=' > ')
-                print('*' * 30)
+                print('\'' * 40)
             else:
                 print('Problema na atualização. Causa ignorada')
         except sqlite3.OperationalError as err:
@@ -153,25 +155,25 @@ class CpuDAO:
             if 'conn' in locals():
                 conn.close()        
 
-    def get_cpus(self):
+    def get_cpus(self):        
         try:
             connection_conn = connection.Connection()
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            selectCpusQuery = "SELECT * FROM CPUs"
+            select_cpus_query = "SELECT * FROM CPUs"
 
-            cursor.execute(selectCpusQuery)
-            result = cursor.fetchall()            
+            cursor.execute(select_cpus_query)
+            results = cursor.fetchall()                        
             cpus = list()
-            for registro in result:
-                cpu_instance = cpu.Cpu(registro[1], registro[2], registro[3], registro[4], registro[5], registro[6])
+
+            for result in results:                
+                cpu_instance = cpu.Cpu(result[1], result[2], result[3], result[4], result[5], result[6])
                 cpus.append(cpu_instance)
+            return cpus            
         except sqlite3.OperationalError as err:
             print('Erro de Banco de Dados: ')
-            print(err)
+            print(err)        
         finally:
-            conn.close()
-            if 'cpus' in locals():
-                return cpus
-            return list()
+            if 'conn' in locals():
+                conn.close()         

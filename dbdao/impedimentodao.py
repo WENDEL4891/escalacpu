@@ -26,9 +26,9 @@ class ImpedimentoDAO:
             quarCond = "DATE(data_fim) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
             condicoes = "(" + primCond + ") AND ( (" + segCond + ") OR (" + terCond + ") OR (" + quarCond + ") )"
 
-            selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos WHERE " + condicoes
+            select_query = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos WHERE " + condicoes
             
-            cursor.execute(selectQuery)
+            cursor.execute(select_query)
             
             impedimentosConflitantes = cursor.fetchall()
             
@@ -53,6 +53,7 @@ class ImpedimentoDAO:
             print('Impedimento cadastrado com sucesso: ')
             for key, value in impedimento_instance.__repr__().items():
                 print(key, value, sep=' > ')
+            print('\'' * 40)
 
         except sqlite3.OperationalError as err:
             print('Erro de Banco de Dados : ')
@@ -179,7 +180,7 @@ class ImpedimentoDAO:
                         print(' | alterado para', dados_para_atualizar_params[key], sep=': ')
                     else:
                         print(key, value, sep=' > ')
-                print('*' * 40)                
+                print('\'' * 40)
             else:
                 print('A atualização não foi efetivada. Motivo ignorado.')
         except sqlite3.OperationalError as err:
@@ -198,7 +199,7 @@ class ImpedimentoDAO:
         data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
         data_inicio_format = datetime.strftime(data_inicio_datetime, '%Y-%m-%d')               
         
-        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM \
+        select_query = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM \
             impedimentos WHERE nome_de_guerra  = '" + nome_de_guerra_format + "' AND  \
             data_inicio = '" + data_inicio_format + "'"        
         
@@ -207,7 +208,7 @@ class ImpedimentoDAO:
             conn = connection_instance.get_connection()            
             cursor = conn.cursor()
             
-            cursor.execute(selectQuery)
+            cursor.execute(select_query)
             result = cursor.fetchall()                        
             
             if len(result) > 1:
@@ -232,17 +233,15 @@ class ImpedimentoDAO:
         if len(data_inicio) != len(data_fim):
             raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')
         
-        data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
-        data_fim_datetime = functions.date_str_to_datetime(data_fim)
-        
-        if len(data_inicio):            
+        if not data_inicio == '':            
+            data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
+            data_fim_datetime = functions.date_str_to_datetime(data_fim)
             if data_inicio_datetime > data_fim_datetime:
                 raise ValueError('A data fim deve ser superior a data de início.')
                                     
-        dta_in_format = datetime.strftime(data_inicio_datetime)
-        dta_fim_format = datetime.strftime(data_fim_datetime)
-
-        if 'dta_in_format' in locals():
+            dta_in_format = datetime.strftime(data_inicio_datetime, '%Y-%m-%d')
+            dta_fim_format = datetime.strftime(data_fim_datetime, '%Y-%m-%d')
+        
             primCond = "'" + dta_in_format + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"        
             segCond = "DATE(data_inicio) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
             terCond = "DATE(data_fim) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
@@ -250,19 +249,18 @@ class ImpedimentoDAO:
         else:
             condicoes = ''
 
-        selectQuery = "SELECT nome_de_guerra, tipo, data_inicio, data_fim FROM impedimentos" + condicoes          
+        select_query = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM impedimentos" + condicoes                  
         
         try:
             connection_instance = connection.Connection()
             conn = connection_instance.get_connection()
             cursor = conn.cursor()            
 
-            cursor.execute(selectQuery)
-            results = cursor.fetchall()
-            # TESTAR O VALOR DE cursor.rowcount QUANDO HOUVER RESULTADOS
-            if len(result):
+            cursor.execute(select_query)
+            results = cursor.fetchall()            
+            if len(results):
                 impedimentos = list()
-                for result in results:
+                for result in results:                    
                     impedimento_instance = impedimento.Impedimento(
                         result[0],
                         result[1],

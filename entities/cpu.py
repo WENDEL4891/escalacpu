@@ -59,8 +59,8 @@ class Cpu:
     def nome_de_guerra(self, dict_nomes):
         if not isinstance(dict_nomes['nome_de_guerra'], str) and isinstance(dict_nomes['nome_completo'], str):
             raise ValueError('Nomes devem ser do tipo string.')
-        nome_de_guerra = dictNomes['nome_de_guerra'].upper()
-        nome_completo = dictNomes['nome_completo'].upper()        
+        nome_de_guerra = dict_nomes['nome_de_guerra'].upper()
+        nome_completo = dict_nomes['nome_completo'].upper()        
         if not len(set(nome_de_guerra.split(' ')).intersection(self.nome_completo.split(' '))):
             print(nome_completo)
             print(nome_de_guerra)
@@ -72,7 +72,7 @@ class Cpu:
         if not isinstance(funcao, str):
             raise TypeError('Função deve ser do tipo string.')
         if not funcao.upper() in funcoes:
-            raise ValueError('funcao deve receber um dos valores seguintes: ' + ', '.join(funcoes) + '.')
+            raise ValueError('O parâmetro funcao deve receber um dos valores seguintes: ' + ', '.join(funcoes) + '.')
         self.__funcao = funcao.upper()
 
     @curso.setter
@@ -85,17 +85,16 @@ class Cpu:
 
     @ano_base.setter
     def ano_base(self, ano_base):
-        if ano_base == '':
+        if ano_base == None or ano_base == '':
             self.__ano_base = None
-        else:
-            if not isinstance(ano_base, int):            
-                try:
-                    ano_base = int(ano_base)
-                except ValueError:
-                    raise ValueError('O parâmetro ano_base deve receber um valor numérico.')        
-            if not 1980 <= ano_base <= datetime.datetime.now().year:
-                raise ValueError('Ano base inválido.')
-            self.__ano_base = ano_base
+            return
+        try:
+            ano_base = int(ano_base)
+        except TypeError:
+            raise TypeError('O parâmetro ano_base deve receber um valor numérico.')        
+        if not 1980 <= ano_base <= datetime.datetime.now().year:
+            raise ValueError('Ano base inválido.')
+        self.__ano_base = ano_base
     
     def __repr__(self):
         return {

@@ -2,6 +2,7 @@ from datetime import datetime
 from .enums import TipoImpedimentoEnum
 from dbdao import cpudao
 from services import functions
+import myexceptions
 
 cpus = cpudao.CpuDAO().get_cpus()      
 nomes_de_guerra = [cpu_instance.nome_de_guerra for cpu_instance in cpus]
@@ -39,7 +40,7 @@ class Impedimento:
     @nome_de_guerra.setter
     def nome_de_guerra(self, nome_de_guerra):
         if not isinstance(nome_de_guerra, str):
-            raise TypeError('Nome de guerra deve ser do tipo string.')        
+            raise TypeError('Nome de guerra deve ser do tipo string.')
         if not nome_de_guerra.upper() in nomes_de_guerra:
             raise ValueError('Nome não cadastrado.')
         self.__nome_de_guerra = nome_de_guerra.upper()
@@ -53,25 +54,25 @@ class Impedimento:
         self.__tipo = tipo.upper()
     
     @data_inicio.setter
-    def data_inicio(self, data_inicio):
-        if not isinstance(data_inicio, str):
-            raise TypeError('Data de início deve ser do tipo string.')            
+    def data_inicio(self, data_inicio):        
         self.__data_inicio = functions.date_str_to_datetime(data_inicio)
         
                     
     @data_fim.setter
     def data_fim(self, data_fim):
         if data_fim == '':
-            data_fim = data_inicio
-        if not isinstance(data_fim, str):
-            raise TypeError('Data fim deve ser do tipo string.')
-        self.__data_fim = functions.date_str_to_datetime(data_fim)
+            self.__data_fim = self.data_inicio
+            return
+        data_fim_datetime = functions.date_str_to_datetime(data_fim)
+        if self.data_inicio > data_fim_datetime:
+            raise myexceptions.LogicException('A data de início não pode ser posterior a data fim.')
+        self.__data_fim = data_fim_datetime
     
     @observacao.setter
     def observacao(self, observacao):
         if not isinstance(observacao, str):
             raise TypeError('O atributo observacao deve ser do tipo string.')        
-        self.__observacao = observacao.upper()
+        self.__observacao = observacao.upper()        
         
     def __repr__(self):
         return {'nome_de_guerra': self.nome_de_guerra,
@@ -79,3 +80,10 @@ class Impedimento:
                 'data_inicio': self.data_inicio,
                 'data_fim': self.data_fim,
                 'observacao': self.observacao}
+    
+    def __str__(self):
+        return 'nome_de_guerra: ' + self.nome_de_guerra +\
+                ' tipo: ' + self.tipo +\
+                ' data_inicio: ' + datetime.strftime(self.data_inicio, '%d/%m/%Y') +\
+                ' data_fim: ' + datetime.strftime(self.data_fim, '%d/%m/%Y') +\
+                ' observacao: ' + self.observacao
