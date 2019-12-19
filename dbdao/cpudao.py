@@ -104,7 +104,7 @@ class CpuDAO:
         
         dados_para_atualizar_para_query = dados_para_atualizar_para_query[0:-2]        
 
-        update_cpu_query = "UPDATE CPUs SET " + dados_para_atualizar_para_query + " WHERE nome_de_guerra = '" + nome_de_guerra_atual.upper() +"'"
+        update_cpu_query = "UPDATE CPUs SET " + dados_para_atualizar_para_query + " WHERE nome_de_guerra = '" + nome_de_guerra_atual.upper() +"'"        
                 
         try:            
             connection_conn = connection.Connection()
@@ -144,7 +144,7 @@ class CpuDAO:
             selectCpuQuery = "SELECT * FROM CPUs WHERE nome_de_guerra = '" + nome_de_guerra.upper() + "'"
 
             cursor.execute(selectCpuQuery)
-            result = cursor.fetchall()            
+            result = cursor.fetchall()
             if len(result):
                 cpu_instance = cpu.Cpu(result[0][1], result[0][2], result[0][3], result[0][4], result[0][5], result[0][6])
                 return cpu_instance

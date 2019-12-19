@@ -10,6 +10,8 @@ print('sem_12', queue.getNext("sem_12"))
 print('sem_3', queue.getNext("sem_3")) """
 
 #servico_dao = servicodao.ServicoDAO()
+#servico_dao.servico_update('29/12/2019', 1, turno=2, nome_estagio='ASP JEAN', data='28/12/2019')
+#servico_dao.servico_remove('19/01/2020', 1)
 #servico_dao.servico_add('RENAN', '19/01/2020', 1, 'Ruan')
 #servico_dao.servico_add('DIMITRI', '19/01/2020', 2)
 #servico_dao.servico_add('HELDER', '16/01/2020', 3, 'gomes')
@@ -18,15 +20,14 @@ print('sem_3', queue.getNext("sem_3")) """
 #for serv in servico_dao.get_servicos():
 #    print(serv)
 
-cpu_dao = cpudao.CpuDAO()
-cpu_dao.cpu_add('2 tEN', 'NOVO CPU6 DA SILVA', 'NOVO CPu', 'op', 'CFO', 2013)
-cpu_dao.cpu_remove('novo cpu')
-#cpu_dao.cpu_update('cpu5', pg='1 tEN', funcao='adm', nome_completo='NOVO CPU5 SILVA')
+#cpu_dao = cpudao.CpuDAO()
+#cpu_dao.cpu_add('2 tEN', 'NOVO CPU5 DA SILVA', 'CPu5', 'op', 'CFO', 2013)
+#cpu_dao.cpu_remove('novo cpu')
+#cpu_dao.cpu_update('cpu5', pg='1 tEN', funcao='adm', nome_completo='NOVO CPU5 SILVA', ano_base='2005')
 #cpu_dao.cpu_remove('NOVO CPU5')
 #cpu_dao.cpu_remove('NOVO CPU7')
 #cpu_dao.cpu_remove('NOVO CPU9')
 #cpu_dao.cpu_remove('NOVO CPU3')
-
 #escalar = services.Escalar()
 #escalar.escalarSeg_Sex()
 

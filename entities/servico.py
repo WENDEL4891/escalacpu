@@ -55,16 +55,27 @@ class Servico:
             if len(nome_estagio):
                 self.__nome_estagio = nome_estagio.upper()
             else:                
-                self.__nome_estagio = None
+                self.__nome_estagio = None               
     
     def __str__(self):
         return\
             'Nome de guerra: ' + self.nome_de_guerra +\
             ' | Data: ' + datetime.strftime(self.data, '%d/%m/%Y') +\
             ' | Turno: ' + str(self.turno) +\
-            ' | Nome estágio: ' + self.nome_estagio\
-                if self.nome_estagio != None\
-                else\
-            'Nome de guerra: ' + self.nome_de_guerra +\
-            ' | Data: ' + datetime.strftime(self.data, '%d/%m/%Y') +\
-            ' | Turno: ' + str(self.turno)
+            (' | Nome estágio: ' + self.nome_estagio if self.nome_estagio != None else '')
+    
+    def __repr__(self):
+        return {
+            'nome_de_guerra': self.nome_de_guerra,
+            'data': self.data,
+            'turno': self.turno,
+            'nome_estagio': self.nome_estagio
+        }
+    
+    def __eq__(self, other_servico):
+        if other_servico == None:
+            return False
+        data_eq = self.data == other_servico.data
+        turno_eq = self.turno == other_servico.turno
+        nome_de_guerra_eq = self.nome_de_guerra == other_servico.nome_de_guerra
+        return data_eq and turno_eq and nomes_de_guerra
