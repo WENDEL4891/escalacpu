@@ -23,4 +23,20 @@ class Feriado:
         if not isinstance(tipo, str):
             raise TypeError('O parâmetro tipo deve ser string.')
         self.__tipo = tipo
+    
+    def __str__(self):
+        return "{0:6}: {2}\n{1:6}: {3}".format("Data", "Tipo", datetime.strftime(self.data, '%d/%m/%Y'), self.tipo)
 
+    def __eq__(self, other_feriado):
+        if other_feriado == None:
+            return False
+        data_eq = self.data == other_feriado.data
+        tipo_eq = self.tipo == other_feriado.tipo
+        return data_eq and tipo_eq
+    
+    def __repr__(self):
+        return {
+            'data': self.data,
+            'tipo': self.tipo
+        }
+    

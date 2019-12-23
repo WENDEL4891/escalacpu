@@ -1,4 +1,4 @@
-from entities import feriado
+from entities import feriado, ordenacaopormilitar
 from db import connection
 import myexceptions
 import copy
@@ -6,12 +6,25 @@ import sys
 import services
 from datetime import datetime
 
-class FeriadoDAO:
-    def feriado_add(self, data, tipo):
+class OrdenacaoPorMilitarDAO:
+    def ordenacao_por_militar_add(self, nome_de_guerra, seg_12, seg_3, ter_qui_sex_12, qua_12, ter_3, qua_3, qui_3, sex_3, fds_12, sab_3, dom_3):
         try:
-            feriado_instance = feriado.Feriado(data, tipo)
+            ordenacao_por_militar = ordenacaopormilitar.OrdenacaoPorMilitar(
+                nome_de_guerra,
+                seg_12,
+                seg_3,
+                ter_qui_sex_12,
+                qua_12,
+                ter_3,
+                qua_3,
+                qui_3,
+                sex_3,
+                fds_12,
+                sab_3,
+                dom_3
+            )
         except:
-            print('Erro ao tentar instanciar um Feriado, no método FeriadoDAO.feriado_add(): ')
+            print('Erro ao tentar instanciar um objeto OrdenacaoPorMilitar, no método OrdenacaoPorMilitarDAO.ordenacao_por_militar_add(): ')
             erros = sys.exc_info()
             for i in range(len(erros) - 1):
                 print(erros[i])
@@ -22,18 +35,31 @@ class FeriadoDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
             
-            add_query = "INSERT INTO feriados VALUES (?, ?)"
-            params = (feriado_instance.data, feriado_instance.tipo)
+            add_query = "INSERT INTO ordenacao_por_militar VALUES ({})".format('?,' * 11 + '?')
+            
+            params = (
+                ordenacao_por_militar.nome_de_guerra,
+                ordenacao_por_militar.seg_12,
+                ordenacao_por_militar.seg_3,
+                ordenacao_por_militar.ter_qui_sex_12,
+                ordenacao_por_militar.qua_12,
+                ordenacao_por_militar.ter_3,
+                ordenacao_por_militar.qua_3,
+                ordenacao_por_militar.qui_3,
+                ordenacao_por_militar.sex_3,
+                ordenacao_por_militar.fds_12,
+                ordenacao_por_militar.sab_3,
+                ordenacao_por_militar.dom_3
+            )
             
             cursor.execute(add_query, params)
             conn.commit()
             if cursor.rowcount == 1:
-                print('Novo feriado cadastrado com sucesso: ')
-                print(feriado_instance)
+                print('Novo registro cadastrado com sucesso na tabela ordenacao_por_militar: ')
+                print(ordenacao_por_militar)
                 print('\'' * 40 )
             else:
                 raise myexceptions.BdOperationError('O cadastro não foi realizado. Causa não identificada.')
-
         except:
             print('Erro ao tentar incluir um feriado no banco de dados : ')
             erros = sys.exc_info()
@@ -43,6 +69,38 @@ class FeriadoDAO:
         finally:
             if 'conn' in locals():
                 conn.close()
+    
+    def get_ordenacao_por_modalidade(self, modalidade, impedidos=[]):
+        if not isinstance(modalidade, str):
+            raise TypeError('O parâmetro modalidade deve receber uma string como argumneto.')
+        modalidades_validas = ('seg_12', 'seg_3', 'ter_qui_sex_12', 'qua_12', 'ter_3', 'qua_3', 'qui_3', 'sex_3', 'fds_12', 'sab_3', 'dom_3')
+        if modalidade not in modalidades_validas:
+            raise ValueError('O parâmetro modalidades deve receber uma dentre as modalidades seguintes: [{}].'.format(', '.join(modalidades_validas)))
+
+        try:
+            connection_conn = connection.Connection()
+            conn = connection_conn.get_connection()
+            cursor = conn.cursor()
+
+            query_get_next = "SELECT nome_de_guerra, {} FROM ordenacao_por_militar".format(modalidade.lower())
+            cursor.execute(query_get_next)
+            results = cursor.fetchall()
+            if results:
+                ordenacao_por_modalidade_dict = dict()
+                for result in results:
+                    ordenacao_por_modalidade_dict[result[0]] = result[1]
+                return ordenacao_por_modalidade_dict
+            else:
+                print('Não há ordenacao cadastrada, na modalidade {}.'.format(modalidade.lower()))
+        except:
+            print('Erro ao tentar obter a ordenação na modalidade {}.'.format(modalidade.lower()))
+            erros = sys.exc_info()
+            for i in range(len(erros) - 1):
+                print(erros[1])
+        finally:
+            if 'conn' in locals():
+                conn.close()
+
 
     def feriado_remove(self, data):
         data_em_datetime = services.functions.date_str_to_datetime(data)
@@ -134,24 +192,38 @@ class FeriadoDAO:
             if 'conn' in locals():
                 conn.close()
     
-    def get_feriado(self, data):
-        data_em_datetime = services.functions.date_str_to_datetime(data)
+    def get_ordenacao_por_militar(self, nome_de_guerra):
+        if not isinstance(nome_de_guerra, str):
+            raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')
         try:
             connection_conn = connection.Connection()
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            selectCpuQuery = "SELECT * FROM feriados WHERE data = '" + datetime.strftime(data_em_datetime, '%Y-%m-%d') + "'"
+            selectCpuQuery = "SELECT * FROM ordenacao_por_militar WHERE nome_de_guerra = '{}'".format(nome_de_guerra.upper())
 
             cursor.execute(selectCpuQuery)
             result = cursor.fetchall()
             if len(result):
-                feriado_instance = feriado.Feriado(result[0][0], str(result[0][1]))
-                return feriado_instance
+                ordenacao_por_militar = ordenacaopormilitar.OrdenacaoPorMilitar(
+                    result[0][0],
+                    result[0][1],
+                    result[0][2],
+                    result[0][3],
+                    result[0][4],
+                    result[0][5],
+                    result[0][6],
+                    result[0][7],
+                    result[0][8],
+                    result[0][9],
+                    result[0][10],
+                    result[0][11]                    
+                )
+                return ordenacao_por_militar
             else:
                 return None
         except:
-            print('Erro ao tentar obter um registro na tabela feriados, no banco de dados: ')
+            print('Erro ao tentar obter um registro na tabela ordenacao_por_militar, no banco de dados: ')
             erros = sys.exc_info()
             for i in range(len(erros) - 1):
                 print(erros[i])

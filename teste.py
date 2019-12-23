@@ -1,6 +1,6 @@
 import services
 import entities
-from dbdao import cpudao, impedimentodao, servicodao
+from dbdao import cpudao, impedimentodao, servicodao, feriadodao, ordenacaopormilitardao
 
 
 """ queue = services.queuemaneger.QueueManager()
@@ -21,6 +21,15 @@ print('sem_3', queue.getNext("sem_3")) """
 #    print(serv)
 
 #cpu_dao = cpudao.CpuDAO()
+#cpus = cpu_dao.get_cpus()
+#cabecalio = '{:^8} | {:^40} | {:^20} | {:^7} | {:^7} | {:^12}'.format('PG', 'NOME COMPLETO', 'NOME DE GUERRA', 'FUNCAO', 'CURSO', 'ANO BASE')
+
+#print(cabecalio)
+#print('-' * len(cabecalio))
+#for cpu in cpus:
+#    ano_base = cpu.ano_base if cpu.ano_base != None else '----'
+#    cpu_format = '{c.pg:^8} | {c.nome_completo:<40} | {c.nome_de_guerra:<20} | {c.funcao:<7} | {c.curso:<7} | {0:^12}'.format(ano_base, c=cpu)
+#    print(cpu_format)
 #cpu_dao.cpu_add('2 tEN', 'NOVO CPU5 DA SILVA', 'CPu5', 'op', 'CFO', 2013)
 #cpu_dao.cpu_remove('novo cpu')
 #cpu_dao.cpu_update('cpu5', pg='1 tEN', funcao='adm', nome_completo='NOVO CPU5 SILVA', ano_base='2005')
@@ -52,3 +61,26 @@ print('sem_3', queue.getNext("sem_3")) """
 #impedimento = Impedimento('maia', 'ferias', '10/10/2020', '20/10/2020')
 #print(impedimento.data_inicio)
 #print(impedimento.data_fim)
+
+#feriado_dao = feriadodao.FeriadoDAO()
+#feriado_dao.feriado_add('31/10/2020', 'Dia dos velhos')
+#feriado_dao.feriado_remove('25/10/2020')
+#feriado_dao.feriado_remove('26/10/2020')
+#feriado_dao.feriado_remove('29/10/2020')
+#feriado_dao.feriado_remove('28/10/2020')
+#feriado_dao.feriado_update('27/10/2020', tipo='NOVO TIPO3')
+#feriado_dao.feriado_update('28/10/2020', tipo='8')
+#feriados = feriado_dao.get_feriados()
+#cabecalio = '{:^12} | {:^30}'.format('DATA', 'TIPO')
+
+#print(cabecalio)
+#print('-' * len(cabecalio))
+#for feriado in feriados:
+#    data = '{f.data:%d/%m/%Y}'.format(f=feriado)
+#    feriado_format = '{:<12} | {f.tipo:<30}'.format(data, f=feriado)
+#    print(feriado_format)
+ordenacao_por_militar_dao = ordenacaopormilitardao.OrdenacaoPorMilitarDAO()
+#ordenacao_por_militar_dao.ordenacao_por_militar_add('cunha',1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 112)
+#print(ordenacao_por_militar_dao.get_ordenacao_por_militar('rodrigo'))
+ordenacao = ordenacao_por_militar_dao.get_ordenacao_por_modalidade('qua_12')
+print(ordenacao)

@@ -1,36 +1,45 @@
 import db
 import copy
 import random
+import sys
 
 class QueueManager:
-    def getNext(self, refQueue):
-        connection = db.connection.Connection()
-        conn = connection.getConnection()
-        cursor = conn.cursor()
-        
-        getListaOrdem = 'SELECT ' + refQueue + ' FROM filaServicos'        
-                
-        cursor.execute(getListaOrdem)
-        results = cursor.fetchall()
+    def getNext(self, ref_queue):
+        try:
+            connection = db.connection.Connection()
+            conn = connection.getConnection()
+            cursor = conn.cursor()
+            
+            get_lista_ordem = 'SELECT {} FROM filas_servicos'.format(ref_queue)        
+                    
+            cursor.execute(get_lista_ordem)
+            results = cursor.fetchall()
+        except:
+            print('Erro ao buscar dados na tabela filas_servicos, no banco de dados.')
+            erros = sys.exc_info()
+            for i in range(len(erros) - 1):
+                print(erros[i])
 
-        listaOrdem = [elemento[0] for elemento in results if elemento[0] != 0 and elemento[0] != None]
-        """ listaOrdem = list()
-
-        for result in results:
-            if result[0] != '0' and result[0] != None:
-                listaOrdem.append(result[0]) """        
+        if results:
+            listaOrdem = [elemento[0] for elemento in results]
+        else:
+            print("A query SQL no banco de dados não retornou nenhum dado da fila {}, na tabela filas_servicos.".format(ref_queue))
         
-        minOrdem = min(listaOrdem)
-        maxOrdem = max(listaOrdem)        
-                     
-        getNome = 'SELECT nome FROM filaServicos WHERE ' + refQueue + ' = ' + str(minOrdem)
+        min_ordem = min(listaOrdem)
+        max_ordem = max(listaOrdem)
+
+
+        
+        
+        update_ordem = "UPDATE filas_servicos SET {} = {}".format()
+        getNome = 'SELECT nome FROM filas_servicos WHERE ' + refQueue + ' = ' + str(minOrdem)
         cursor.execute(getNome)
         nome = cursor.fetchone()[0]        
 
-        vaiProFimDaFila = 'INSERT INTO filaServicos (nome, '+ refQueue +') VALUES (?, ?) '
+        vaiProFimDaFila = 'INSERT INTO filas_servicos (nome, '+ refQueue +') VALUES (?, ?) '
         cursor.execute(vaiProFimDaFila, (nome, maxOrdem + 1))        
         
-        updateOrdem = 'UPDATE filaServicos SET '+ refQueue +' = 0 WHERE '+ refQueue +' = ' + str(minOrdem)
+        updateOrdem = 'UPDATE filas_servicos SET '+ refQueue +' = 0 WHERE '+ refQueue +' = ' + str(minOrdem)
         cursor.execute(updateOrdem)
         conn.commit()
 
@@ -42,7 +51,7 @@ class QueueManager:
         conn = connection.getConnection()
         cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM filaServicos")
+        cursor.execute("DELETE FROM filas_servicos")
 
         cursor.execute("SELECT pg, nomeDeGuerra, funcao FROM CPUs")
         results = cursor.fetchall()
@@ -72,7 +81,7 @@ class QueueManager:
         listaSex3 = copy.copy(listaOrdens)
         random.shuffle(listaSex3)
         
-        queryInsert = "INSERT INTO filaServicos (nome, sem_12, sem_3, fds_12, sab_3, dom_3, sex_3) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        queryInsert = "INSERT INTO filas_servicos (nome, sem_12, sem_3, fds_12, sab_3, dom_3, sex_3) VALUES (?, ?, ?, ?, ?, ?, ?)"
         for num in range(0, qtdCPUs):            
             conn.execute(queryInsert,
                 (

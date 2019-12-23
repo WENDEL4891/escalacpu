@@ -96,15 +96,6 @@ class Cpu:
             raise ValueError('Ano base inválido.')
         self.__ano_base = ano_base
     
-    def __repr__(self):
-        return {
-            'pg': self.pg,
-            'nome_completo': self.nome_completo,
-            'nome_de_guerra': self.nome_de_guerra,
-            'funcao': self.funcao,
-            'curso': self.curso,
-            'ano_base': self.ano_base
-        }
 
     def __eq__(self, other_cpu):
         if other_cpu == None:
@@ -116,6 +107,16 @@ class Cpu:
         curso_eq = self.curso == other_cpu.curso
         ano_base_eq = self.ano_base == other_cpu.ano_base        
         return  pg_eq and nome_completo_eq and nome_de_guerra_eq and funcao_eq and curso_eq and ano_base_eq
+
+    def __repr__(self):
+        return {
+            'pg': self.pg,
+            'nome_completo': self.nome_completo,
+            'nome_de_guerra': self.nome_de_guerra,
+            'funcao': self.funcao,
+            'curso': self.curso,
+            'ano_base': self.ano_base
+        }
 
     def __str__(self):
         return\
