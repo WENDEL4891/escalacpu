@@ -232,23 +232,9 @@ class OrdenacaoPorMilitarDAO:
             if 'conn' in locals():
                 conn.close()        
 
-    def get_feriados(self, data_inicio='', data_fim=''):        
-        if not isinstance(data_inicio, str) and isinstance(data_fim, str):
-            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser strings.')
+    def get_ordenacao_por_militar_all(self):
         
-        if len(data_inicio) != len(data_fim):
-            raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')
-        
-        if not data_inicio == '':            
-            data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
-            data_fim_datetime = functions.date_str_to_datetime(data_fim)
-            if data_inicio_datetime > data_fim_datetime:
-                raise ValueError('A data fim deve ser superior a data de início.')                   
-            condicoes_select = "WHERE data BETWEEN '{:%Y-%m-%d}' AND '{:%Y-%m-%d}'".format(data_inicio_datetime, data_fim_datetime)
-        else:
-            condicoes_select = ''
-
-        select_query = "SELECT * FROM feriados {}".format(condicoes_select)
+        select_query = "SELECT * FROM ordenacao_por_militar"
         
         try:
             connection_instance = connection.Connection()
@@ -258,14 +244,13 @@ class OrdenacaoPorMilitarDAO:
             cursor.execute(select_query)
             results = cursor.fetchall()            
             if len(results):                
-                feriados = list()
-                for result in results:                                        
-                    feriado_instance = feriado.Feriado(
-                        result[0],
-                        str(result[1])
+                ordenacoes = list()
+                for result in results:
+                    ordenacao_por_militar = ordenacaopormilitar.OrdenacaoPorMilitar(
+                        result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11]
                     )
-                    feriados.append(feriado_instance)
-                return feriados
+                    ordenacoes.append(ordenacao_por_militar)
+                return ordenacoes
             else:
                 return list()
         except:

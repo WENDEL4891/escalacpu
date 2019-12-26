@@ -2,6 +2,7 @@ from datetime import datetime
 from dbdao import cpudao
 from services import functions
 import myexceptions
+import config
 
 cpus = cpudao.CpuDAO().get_cpus()
 nomes_de_guerra = [cpu_instance.nome_de_guerra for cpu_instance in cpus]
@@ -55,7 +56,35 @@ class Servico:
             if len(nome_estagio):
                 self.__nome_estagio = nome_estagio.upper()
             else:                
-                self.__nome_estagio = None               
+                self.__nome_estagio = None
+
+    def get_modalidade(self):        
+        if self.get_weekday() == 'segunda' and self.turno in (1, 2):
+            return 'seg_12'
+        if self.get_weekday() == 'segunda' and self.turno == 3:
+            return 'seg_3'
+        if self.get_weekday() in ('terca', 'quinta', 'sexta') and self.turno in (1, 2):
+            return 'ter_qui_sex_12'
+        if self.get_weekday() == 'quarta' and self.turno in (1, 2):
+            return 'qua_12'
+        if self.get_weekday() == 'terca' and self.turno == 3:
+            return 'ter_3'
+        if self.get_weekday() == 'quarta' and self.turno == 3:
+            return 'qua_3'
+        if self.get_weekday() == 'quinta' and self.turno == 3:
+            return 'qui_3'
+        if self.get_weekday() == 'sexta' and self.turno == 3:
+            return 'sex_3'
+        if self.get_weekday() in ('sabado', 'domingo') and self.turno in (1, 2):
+            return 'fds_12'
+        if self.get_weekday() == 'sabado' and self.turno == 3:
+            return 'sab_3'
+        if self.get_weekday() == 'domingo' and self.turno == 3:
+            return 'dom_3'
+        raise myexceptions.LogicException('O método Servico.get_modalidade() deve retornar alguma modalidade válida, considerando o dia da semana e o turno. Revisar função.')
+    
+    def get_weekday(self):
+        return config.dias_da_semana[self.data.weekday()]
     
     def __str__(self):
         return\
