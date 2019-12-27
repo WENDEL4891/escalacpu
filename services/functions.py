@@ -44,3 +44,8 @@ def date_str_to_datetime(data_str):
         except:
             raise ValueError('A data deve estar em um dos formatos:\ndd/mm/AAAA\nAAAA-mm-dd')
         return data
+
+def get_value_from_key_in_dict(_dict, value_parameter):
+    for key, value in _dict.items():
+        if value == value_parameter:
+            return key
