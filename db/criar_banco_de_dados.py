@@ -1,4 +1,4 @@
-import connection
+from connection import Connection
 import sys
 
 
@@ -60,7 +60,7 @@ create_tables_queries = (
 )
 
 try:    
-    _connection = connection.Connection()
+    _connection = Connection()
     conn = _connection.get_connection()
     cursor = conn.cursor()
 

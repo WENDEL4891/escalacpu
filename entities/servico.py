@@ -32,8 +32,10 @@ class Servico:
 
     @nome_de_guerra.setter
     def nome_de_guerra(self, nome_de_guerra):
-        if not nome_de_guerra in nomes_de_guerra:
-            raise ValueError('Nome de guerra não cadastrado.')
+        if not isinstance(nome_de_guerra, str):
+            raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')
+        if not nome_de_guerra.upper() in nomes_de_guerra:
+            raise ValueError('Nome de guerra não cadastrado: {}.'.format(nome_de_guerra))
         self.__nome_de_guerra = nome_de_guerra.upper()
     
     @data.setter

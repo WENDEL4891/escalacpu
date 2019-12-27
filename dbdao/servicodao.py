@@ -9,7 +9,7 @@ import myexceptions
 
 class ServicoDAO:
     def __init__(self):
-        self.primeiraDataDeServico = datetime.strptime(config.primeira_data, '%d/%m/%Y')
+        self.primeira_data_de_servico = functions.date_str_to_datetime(config.primeira_data)
 
     def servico_add(self, nome_de_guerra, data, turno, nome_estagio=None):        
         serv_inst = servico.Servico(nome_de_guerra, data, turno, nome_estagio)
@@ -197,23 +197,33 @@ class ServicoDAO:
 
     
     def get_qtd_de_servicos_por_dia(self):
-        conn_inst = connection.Connection()
-        conn = conn_inst.get_connection()
-        cursor = conn.cursor()
+        try:                
+            conn_inst = connection.Connection()
+            conn = conn_inst.get_connection()
+            cursor = conn.cursor()
 
-        getContagem = "SELECT data, SUM(turno), COUNT(data) FROM servicos GROUP BY data;"
+            get_contagem_query = "SELECT data, SUM(turno), COUNT(data) FROM servicos GROUP BY data;"
 
-        cursor.execute(getContagem)
-        qtdServicosPorDiaList = cursor.fetchall()
-        conn.close()
-        qtdServicosPorDiaDict = dict()        
-        for el in qtdServicosPorDiaList:
-            qtdServicosPorDiaDict[datetime.strptime(el[0], '%Y-%m-%d')] = {'somaTurnos':el[1], 'contDatas': el[2]}
-        return qtdServicosPorDiaDict
+            cursor.execute(get_contagem_query)
+            qtd_de_servicos_por_dia_list = cursor.fetchall()            
+        except:
+            erros = sys.exc_info()
+            for i in range(len(erros) - 1):
+                print(erros[i])
+                raise
+        finally:
+            if 'conn' in locals():
+                conn.close()
+
+        qtd_de_servicos_por_dia_dict = dict()
+        for el in qtd_de_servicos_por_dia_list:
+            data = functions.date_str_to_datetime(el[0])
+            qtd_de_servicos_por_dia_dict[data] = {'soma_turnos':el[1], 'cont_datas': el[2]}        
+        return qtd_de_servicos_por_dia_dict
     
-    def get_servicos_from_data(self, data):
-        data = datetime.strptime(data, '%d/%m/%Y')
-        dataFormat = datetime.strftime(data, '%Y-%m-%d')
+    def get_servicos_from_data(self, data_in_datetime):
+        data_in_datetime = datetime.strptime(data_in_datetime, '%d/%m/%Y')
+        dataFormat = datetime.strftime(data_in_datetime, '%Y-%m-%d')
         print(dataFormat)
         conn_inst = connection.Connection()
         conn = conn_inst.get_connection()
@@ -226,13 +236,13 @@ class ServicoDAO:
         return servicosInList
         
     def get_data_com_qtde_de_servicos_incompleta(self):        
-        data = self.primeiraDataDeServico
-        qtdDeServicosPorDiaDict = self.getQtdDeServicosPorDia()
-        datasList = list(qtdDeServicosPorDiaDict)
+        data = self.primeira_data_de_servico
+        qtd_de_servicos_por_dia_dict = self.get_qtd_de_servicos_por_dia()
+        datasList = list(qtd_de_servicos_por_dia_dict)
                 
         while(True):                        
             if data in datasList:
-                if qtdDeServicosPorDiaDict[data]['somaTurnos'] == 6:
+                if qtd_de_servicos_por_dia_dict[data]['soma_turnos'] == 6:
                     data += datetime.timedelta(days=1)                    
                 else:                    
                     return data
