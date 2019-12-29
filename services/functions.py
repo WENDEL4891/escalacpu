@@ -50,40 +50,40 @@ def get_value_from_key_in_dict(_dict, value_parameter):
         if value == value_parameter:
             return key
 
-def classifica_servico_por_modalidade(data, turno):
-    if turno not in (1, 2, 3, '1', '2', '3'):
-        raise ValueError('O parâmetro turno só aceita os argumentos 1, 2 ou 3.')
-    turno = int(turno)
-    dias_da_semana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo']
-    try:
-        dia_da_semana = dias_da_semana[data.weekday()]
-    except:
-        try:
-            data_in_datetime = date_str_to_datetime(data)
-            dia_da_semana = dias_da_semana[data_in_datetime.weekday()]
-        except:
-            raise ValueError('O parâmetro data recebe uma data válida, em datetime ou em string, em algum dos formatos: dd/mm/AAAA; AAAA-mm-dd.')
-    
-    
-    if dia_da_semana == 'segunda' and turno in (1, 2):
-        return 'seg_12'
-    if dia_da_semana == 'segunda' and turno == 3:
-        return 'seg_3'
-    if dia_da_semana in ('terca', 'quinta', 'sexta') and turno in (1, 2):
-        return 'ter_qui_sex_12'
-    if dia_da_semana == 'quarta' and turno in (1, 2):
-        return 'qua_12'
-    if dia_da_semana == 'terca' and turno == 3:
-        return 'ter_3'
-    if dia_da_semana == 'quarta' and turno == 3:
-        return 'qua_3'
-    if dia_da_semana == 'quinta' and turno == 3:
-        return 'qui_3'
-    if dia_da_semana == 'sexta' and turno == 3:
-        return 'sex_3'
-    if dia_da_semana in ('sabado', 'domingo') and turno in (1, 2):
-        return 'fds_12'
-    if dia_da_semana == 'sabado' and turno == 3:
-        return 'sab_3'
-    if dia_da_semana == 'domingo' and turno == 3:
-        return 'dom_3'
+#def classifica_servico_por_modalidade(data, turno):
+#    if turno not in (1, 2, 3, '1', '2', '3'):
+#        raise ValueError('O parâmetro turno só aceita os argumentos 1, 2 ou 3.')
+#    turno = int(turno)
+#    dias_da_semana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo']
+#    try:
+#        dia_da_semana = dias_da_semana[data.weekday()]
+#    except:
+#        try:
+#            data_in_datetime = date_str_to_datetime(data)
+#            dia_da_semana = dias_da_semana[data_in_datetime.weekday()]
+#        except:
+#            raise ValueError('O parâmetro data recebe uma data válida, em datetime ou em string, em algum dos formatos: dd/mm/AAAA; AAAA-mm-dd.')
+#    
+#    
+#    if dia_da_semana == 'segunda' and turno in (1, 2):
+#        return 'seg_12'
+#    if dia_da_semana == 'segunda' and turno == 3:
+#        return 'seg_3'
+#    if dia_da_semana in ('terca', 'quinta', 'sexta') and turno in (1, 2):
+#        return 'ter_qui_sex_12'
+#    if dia_da_semana == 'quarta' and turno in (1, 2):
+#        return 'qua_12'
+#    if dia_da_semana == 'terca' and turno == 3:
+#        return 'ter_3'
+#    if dia_da_semana == 'quarta' and turno == 3:
+#        return 'qua_3'
+#    if dia_da_semana == 'quinta' and turno == 3:
+#        return 'qui_3'
+#    if dia_da_semana == 'sexta' and turno == 3:
+#        return 'sex_3'
+#    if dia_da_semana in ('sabado', 'domingo') and turno in (1, 2):
+#        return 'fds_12'
+#    if dia_da_semana == 'sabado' and turno == 3:
+#        return 'sab_3'
+#    if dia_da_semana == 'domingo' and turno == 3:
+#        return 'dom_3'

@@ -11,10 +11,10 @@ print('sem_12', queue.getNext("sem_12"))
 print('sem_3', queue.getNext("sem_3")) """
 
 #servico_dao = servicodao.ServicoDAO()
-#servico_dao.servico_add('DIMITRi', '04/01/2021', 1)
-#servico_dao.servico_add('FERNANDA', '04/01/2021', 2)
-#servico_dao.servico_add('CUNHA', '04/01/2021', 3)
-#servico_dao.servico_add('MARCELO', '05/01/2021', 1)
+#servico_dao.servico_add('04/03/2021', 1, 'DIMITRi')
+#servico_dao.servico_add('04/03/2021', 2, 'FERNANDA')
+#servico_dao.servico_add('04/03/2021', 3, 'CUNHA')
+#servico_dao.servico_add('05/01/2021', 1, 'MARCELO')
 #servico_dao.servico_add('JONAS', '05/01/2021', 2)
 #servico_dao.servico_add('GONDIM', '05/01/2021', 3)
 #servico_dao.servico_add('JEFFERSON', '06/01/2021', 1)
@@ -36,7 +36,7 @@ print('sem_3', queue.getNext("sem_3")) """
 #servico_dao.servico_add('HELDER', '16/01/2020', 3, 'gomes')
 #servico_dao.servico_add('MADUREIRA', '15/01/2020', 1)
 #servico_dao.servico_add('EVERTON CAMPOS', '15/01/2020', 2)
-#servico_dao.servico_update('29/12/2019', 1, turno=2, nome_estagio='ASP JEAN', data='28/12/2019')
+#servico_dao.servico_update('04/03/2021', 1, nome_estagio='ASP ruan JÚNIOR',_cpu='EVERTON CAMPOS')
 #servico_dao.servico_remove('19/01/2020', 1)
 #for serv in servico_dao.get_servicos():
 #    print(serv)
@@ -116,6 +116,8 @@ print('sem_3', queue.getNext("sem_3")) """
 #cpu_dao.cpu_remove('NOVO CPU3')
 #_escalar = escalar.Escalar()
 escalar.Escalar().escalar_seg_a_dom()
+
+
 
 #_servico = servico.Servico('10/10/2020', 2, 'MADUREIRA', 'ASP GOULARD')
 

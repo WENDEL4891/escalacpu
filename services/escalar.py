@@ -90,21 +90,136 @@ class Escalar:
         for data, turnos in dias_e_turnos_seg_a_dom_dict.items():
             for turno in turnos:
                 servicos_para_completar_list.append(servico.Servico(data, turno))
-        for _servico in servicos_para_completar_list:
-            print(_servico)
         
-        
-        dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
-        
-        
-        gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
+        #for s in servicos_para_completar_list:
+        #    servicodao.ServicoDAO().servico_add(s.data, s.turno, 'MADUREIRA')
 
-        now = datetime.datetime.now().date()
-        now_str = '28/12/2019'
         
+        seg_dom_atual = list(filter(lambda data: data.weekday() in (0, 6), dias_e_turnos_seg_a_dom_dict))
+        ter_atual = list(filter(lambda data: data.weekday() == 1, dias_e_turnos_seg_a_dom_dict))                
+        
+        seg_dom_semana_anterior = list(map(lambda data: data - datetime.timedelta(days=7), seg_dom_atual))
+        ter_semana_anterior = list(map(lambda data: data - datetime.timedelta(days=7), ter_atual))
+        
+                
+        servicos_tm_A_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), seg_dom_semana_anterior))
+        servicos_tm_B_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), ter_semana_anterior))
 
-        #print(functions.classifica_servico_por_modalidade(now, 2))
-        #print(functions.classifica_servico_por_modalidade(now_str, 3))        
+        for i in servicos_tm_A_semana_anterior:
+            print(i)
+        print('-' * 40)
+        for i in servicos_tm_B_semana_anterior:
+            print(i)
+
+        
+        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), servicos_para_completar_list))
+        servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), servicos_para_completar_list))
+        servicos_para_completar_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', servicos_para_completar_list))
+        servicos_para_completar_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', servicos_para_completar_list))
+        servicos_para_completar_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', servicos_para_completar_list))
+        servicos_para_completar_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', servicos_para_completar_list))
+        servicos_para_completar_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', servicos_para_completar_list))
+        servicos_para_completar_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', servicos_para_completar_list))
+        servicos_para_completar_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', servicos_para_completar_list))
+        servicos_para_completar_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', servicos_para_completar_list))
+        servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', servicos_para_completar_list))
+        servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', servicos_para_completar_list))
+        servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', servicos_para_completar_list))
+
+
+
+        
+        #count1 = 0
+        #count2 = 0
+        #print('servicos_para_completar_fds')
+        #count1 += len(servicos_para_completar_fds)
+        #for s in servicos_para_completar_fds:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_semana')
+        #count1 += len(servicos_para_completar_semana)
+        #for s in servicos_para_completar_semana:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_seg_12')
+        #count2 += len(servicos_para_completar_seg_12)
+        #for s in servicos_para_completar_seg_12:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_seg_3')
+        #count2 += len(servicos_para_completar_seg_3)
+        #for s in servicos_para_completar_seg_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_ter_qui_sex_12')
+        #count2 += len(servicos_para_completar_ter_qui_sex_12)
+        #for s in servicos_para_completar_ter_qui_sex_12:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_qua_12')
+        #count2 += len(servicos_para_completar_qua_12)
+        #for s in servicos_para_completar_qua_12:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_ter_3')
+        #count2 += len(servicos_para_completar_ter_3)
+        #for s in servicos_para_completar_ter_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_qua_3')
+        #count2 += len(servicos_para_completar_qua_3)
+        #for s in servicos_para_completar_qua_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_qui_3')
+        #count2 += len(servicos_para_completar_qui_3)
+        #for s in servicos_para_completar_qui_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_sex_3')
+        #count2 += len(servicos_para_completar_sex_3)
+        #for s in servicos_para_completar_sex_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_fds_12')
+        #count2 += len(servicos_para_completar_fds_12)
+        #for s in servicos_para_completar_fds_12:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_sab_3')
+        #count2 += len(servicos_para_completar_sab_3)
+        #for s in servicos_para_completar_sab_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('servicos_para_completar_dom_3')
+        #count2 += len(servicos_para_completar_dom_3)
+        #for s in servicos_para_completar_dom_3:
+        #    print(s)
+        #print('-' * 30)
+        #print('\n')
+        #print('count1: {}'.format(count1))
+        #print('count2: {}'.format(count2))
+        
+        
+        
+        #dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
+        
+        
+        #gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
+
+        
         
         #seg_format = datetime.datetime.strftime(segunda_feira, '%Y-%m-%d')
         #dom_format = datetime.datetime.strftime(domingo, '%Y-%m-%d')

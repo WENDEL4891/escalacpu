@@ -11,9 +11,9 @@ class ServicoDAO:
     def __init__(self):
         self.primeira_data_de_servico = functions.date_str_to_datetime(config.primeira_data)
 
-    def servico_add(self, data, turno, nome_de_guerra, nome_estagio=None):        
-        serv_inst = servico.Servico(data, turno, nome_de_guerra, nome_estagio)
-        if serv_inst.nome_de_guerra == 'DEFAULT':
+    def servico_add(self, data, turno, _cpu, nome_estagio=None):        
+        serv_inst = servico.Servico(data, turno, _cpu, nome_estagio)
+        if serv_inst.cpu.nome_de_guerra == 'DEFAULT':
             raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
 
         try:
@@ -22,7 +22,7 @@ class ServicoDAO:
             cursor = conn.cursor()
 
             insertServico = 'INSERT INTO servicos VALUES (?, ?, ?, ?)'
-            params = (serv_inst.data, serv_inst.turno, serv_inst.nome_de_guerra, serv_inst.nome_estagio)
+            params = (serv_inst.data, serv_inst.turno, serv_inst.cpu.nome_de_guerra, serv_inst.nome_estagio)
             cursor.execute(insertServico, params)
             conn.commit()
             if cursor.rowcount == 1:
@@ -43,7 +43,10 @@ class ServicoDAO:
                 conn.close()
     
     def get_servico(self, data, turno):
-        data_datetime = functions.date_str_to_datetime(data)
+        if isinstance(data, datetime.date):
+            data_datetime = data
+        else:
+            data_datetime = functions.date_str_to_datetime(data)
         data_format = datetime.datetime.strftime(data_datetime, '%Y-%m-%d')
         if turno not in (1, 2, 3, '1', '2', '3'):
             raise ValueError('O parâmetro turno deve receber o valor 1, 2 ou 3.')
@@ -119,6 +122,9 @@ class ServicoDAO:
 
         elif data_inicio == None and data_fim == None:
             complemento_query = ''
+
+        elif data_inicio == None or data_fim == None:
+            raise ValueError('Os parâmetros data_inicio e data_fim devem ambos serem deixados em branco ou receberem argumentos do mesmo tipo, str ou datetime.date.')
         
         else:
             raise ValueError('Os parâmetros data_inicio e data_fim devem ambos serem deixados em branco ou receberem argumentos do mesmo tipo, str ou datetime.date.')
@@ -153,7 +159,7 @@ class ServicoDAO:
             if 'conn' in locals():
                 conn.close()
     
-    def servico_update(self, data_atual, turno_atual, data=None, turno=None, nome_de_guerra=None, nome_estagio=None):
+    def servico_update(self, data_atual, turno_atual, data=None, turno=None, _cpu=None, nome_estagio=None):
         servico_para_ser_atualizado = self.get_servico(data_atual, turno_atual)
         if servico_para_ser_atualizado == None:
             raise ValueError('Não há servico para ser atualizado, com a data e o turno informados (' + data_atual + ', ' + str(turno_atual) + 'º turno).')
@@ -161,10 +167,11 @@ class ServicoDAO:
         servico_atualizador = servico.Servico(
             data if data != None else datetime.datetime.strftime(servico_para_ser_atualizado.data, '%Y-%m-%d'),
             turno if turno != None else servico_para_ser_atualizado.turno,
-            nome_de_guerra if nome_de_guerra != None else servico_para_ser_atualizado.nome_de_guerra,
+            _cpu if _cpu != None else servico_para_ser_atualizado.cpu,
             nome_estagio if nome_estagio != None else servico_para_ser_atualizado.nome_estagio            
         )
-        if servico_atualizador.nome_de_guerra == 'DEFAULT':
+        
+        if servico_atualizador.cpu.nome_de_guerra == 'DEFAULT':
             raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
 
         if servico_para_ser_atualizado == servico_atualizador:
@@ -176,6 +183,8 @@ class ServicoDAO:
                 continue
             if key == 'data':
                 complemento_query += key + " = '" + datetime.datetime.strftime(servico_atualizador.data, '%Y-%m-%d') + "', "
+            if key == 'cpu':
+                complemento_query += 'nome_de_guerra' + " = '" + value.nome_de_guerra + "', "
             else:
                 complemento_query += key + " = '" + str(value) + "', "
         complemento_query = complemento_query[:-2]
@@ -194,6 +203,8 @@ class ServicoDAO:
             if cursor.rowcount == 1:
                 serv_antes_dict = servico_para_ser_atualizado.__repr__()
                 serv_depois_dict = servico_atualizador.__repr__()
+                serv_antes_dict['cpu'] = '{} {}'.format(serv_antes_dict['cpu'].pg, serv_antes_dict['cpu'].nome_de_guerra)
+                serv_depois_dict['cpu'] = '{} {}'.format(serv_depois_dict['cpu'].pg, serv_depois_dict['cpu'].nome_de_guerra)
 
                 serv_antes_dict['data'] = datetime.datetime.strftime(serv_antes_dict['data'], '%d/%m/%Y')
                 serv_depois_dict['data'] = datetime.datetime.strftime(serv_depois_dict['data'], '%d/%m/%Y')
@@ -266,7 +277,7 @@ class ServicoDAO:
         while(True):                        
             if data in datasList:
                 if qtd_de_servicos_por_dia_dict[data]['soma_turnos'] == 6:
-                    data += datetime.datetime.timedelta(days=1)                    
+                    data += datetime.timedelta(days=1)                    
                 else:                    
                     return data
             else:
