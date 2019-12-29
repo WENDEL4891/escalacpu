@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from dbdao import cpudao
 from services import functions
 import myexceptions
@@ -8,15 +8,11 @@ cpus = cpudao.CpuDAO().get_cpus()
 nomes_de_guerra = [cpu_instance.nome_de_guerra for cpu_instance in cpus]
 
 class Servico:
-    def __init__(self, nome_de_guerra, data, turno, nome_estagio=None):
-        self.nome_de_guerra = nome_de_guerra
+    def __init__(self, data, turno, nome_de_guerra='DEFAULT', nome_estagio=None):
         self.data = data
         self.turno = turno
+        self.nome_de_guerra = nome_de_guerra
         self.nome_estagio = nome_estagio
-
-    @property
-    def nome_de_guerra(self):
-        return self.__nome_de_guerra
     
     @property
     def data(self):
@@ -25,28 +21,37 @@ class Servico:
     @property
     def turno(self):
         return self.__turno
+
+    @property
+    def nome_de_guerra(self):
+        return self.__nome_de_guerra
     
     @property
     def nome_estagio(self):
         return self.__nome_estagio
 
-    @nome_de_guerra.setter
-    def nome_de_guerra(self, nome_de_guerra):
-        if not isinstance(nome_de_guerra, str):
-            raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')
-        if not nome_de_guerra.upper() in nomes_de_guerra:
-            raise ValueError('Nome de guerra não cadastrado: {}.'.format(nome_de_guerra))
-        self.__nome_de_guerra = nome_de_guerra.upper()
     
     @data.setter
     def data(self, data):
-        self.__data = functions.date_str_to_datetime(data)
+        if isinstance(data, datetime.date):
+            self.__data = data
+        else:
+            self.__data = functions.date_str_to_datetime(data)
     
     @turno.setter
     def turno(self, turno):
         if turno not in (1, 2, 3, '1', '2', '3'):
             raise ValueError('O parâmetro turno só recebe os argumentos 1, 2 ou 3.')
         self.__turno = int(turno)
+    
+    @nome_de_guerra.setter
+    def nome_de_guerra(self, nome_de_guerra):
+        if not isinstance(nome_de_guerra, str):
+            raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')
+        if not nome_de_guerra.upper() in nomes_de_guerra:
+            if not nome_de_guerra.upper() == 'DEFAULT':
+                raise ValueError('Nome de guerra não cadastrado: {}.'.format(nome_de_guerra))
+        self.__nome_de_guerra = nome_de_guerra.upper()
     
     @nome_estagio.setter
     def nome_estagio(self, nome_estagio):
@@ -85,21 +90,32 @@ class Servico:
             return 'dom_3'
         raise myexceptions.LogicException('O método Servico.get_modalidade() deve retornar alguma modalidade válida, considerando o dia da semana e o turno. Revisar função.')
     
+    def is_weekend(self):
+        weekend = ('sabado', 'domingo')
+        weekday = ('segunda', 'terca', 'quarta', 'quinta', 'sexta')
+        if self.get_weekday() in weekend:
+            return True
+        if self.get_weekday() in weekday:
+            return False
+        raise myexceptions.LogicException('O método is_weekend() está retornando algum valór inapropriado.')
+    
     def get_weekday(self):
         return config.dias_da_semana[self.data.weekday()]
     
     def __str__(self):
-        return\
-            'Nome de guerra: ' + self.nome_de_guerra +\
-            ' | Data: ' + datetime.strftime(self.data, '%d/%m/%Y') +\
-            ' | Turno: ' + str(self.turno) +\
-            (' | Nome estágio: ' + self.nome_estagio if self.nome_estagio != None else '')
+        return 'Data: {} | Turno: {} | Nome de guerra: {}{}'.format(
+            datetime.datetime.strftime(self.data, '%d/%m/%Y'),
+            str(self.turno),
+            self.nome_de_guerra,
+            (' | Nome estágio: ' + self.nome_estagio if self.nome_estagio != None else '')    
+        ) 
+        
     
     def __repr__(self):
         return {
-            'nome_de_guerra': self.nome_de_guerra,
             'data': self.data,
             'turno': self.turno,
+            'nome_de_guerra': self.nome_de_guerra,
             'nome_estagio': self.nome_estagio
         }
     
@@ -110,3 +126,8 @@ class Servico:
         turno_eq = self.turno == other_servico.turno
         nome_de_guerra_eq = self.nome_de_guerra == other_servico.nome_de_guerra
         return data_eq and turno_eq and nomes_de_guerra
+
+    def __gt__(self, other_servico):
+        if self.data == other_servico.data:
+            return self.turno > other_servico.turno
+        return self.data > other_servico.data

@@ -5,6 +5,7 @@ import copy
 import sys
 import services
 from datetime import datetime
+from services import functions
 
 class FeriadoDAO:
     def feriado_add(self, data, tipo):

@@ -163,7 +163,7 @@ class CpuDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            select_cpus_query = "SELECT * FROM CPUs"
+            select_cpus_query = "SELECT * FROM CPUs ORDER BY ano_base DESC"
 
             cursor.execute(select_cpus_query)
             results = cursor.fetchall()                        

@@ -2,7 +2,7 @@ from dbdao import cpudao
 import services.functions
 import myexceptions
 
-modalidades_validas = ('seg_12','seg_3','ter_qui_sex_12','qua_12','ter_3','qua_3','qui_3','sex_3','fds_12','sab_3','dom_3')
+modalidades_validas = ('fds', 'semana', 'seg_12','seg_3','ter_qui_sex_12','qua_12','ter_3','qua_3','qui_3','sex_3','fds_12','sab_3','dom_3')
 nomes_de_guerra = [_cpu.nome_de_guerra for _cpu in cpudao.CpuDAO().get_cpus() if _cpu.funcao != 'TM']
 qtd_nomes_de_guerra = len(nomes_de_guerra)
 
@@ -14,8 +14,10 @@ class FilaPorModalidade:
             raise ValueError('Somente são aceitas modalidades dentre as seguintes: {}'.format(', '.join(modalidades_validas)))
         self.modalidade = modalidade
         self.fila = dict()
+        for nome_de_guerra in nomes_de_guerra:
+            self.membro_add_final_da_fila(nome_de_guerra)
     
-    def membro_add(self, nome_de_guerra):
+    def membro_add_final_da_fila(self, nome_de_guerra):
         ultima_posicao = len(self.fila)
         if not isinstance(nome_de_guerra, str):
             raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')        

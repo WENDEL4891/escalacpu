@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from db import connection
 from entities import servico
 import config
@@ -11,8 +11,10 @@ class ServicoDAO:
     def __init__(self):
         self.primeira_data_de_servico = functions.date_str_to_datetime(config.primeira_data)
 
-    def servico_add(self, nome_de_guerra, data, turno, nome_estagio=None):        
-        serv_inst = servico.Servico(nome_de_guerra, data, turno, nome_estagio)
+    def servico_add(self, data, turno, nome_de_guerra, nome_estagio=None):        
+        serv_inst = servico.Servico(data, turno, nome_de_guerra, nome_estagio)
+        if serv_inst.nome_de_guerra == 'DEFAULT':
+            raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
 
         try:
             conn_inst = connection.Connection()
@@ -20,7 +22,7 @@ class ServicoDAO:
             cursor = conn.cursor()
 
             insertServico = 'INSERT INTO servicos VALUES (?, ?, ?, ?)'
-            params = (serv_inst.nome_de_guerra, serv_inst.data, serv_inst.turno, serv_inst.nome_estagio)
+            params = (serv_inst.data, serv_inst.turno, serv_inst.nome_de_guerra, serv_inst.nome_estagio)
             cursor.execute(insertServico, params)
             conn.commit()
             if cursor.rowcount == 1:
@@ -42,7 +44,7 @@ class ServicoDAO:
     
     def get_servico(self, data, turno):
         data_datetime = functions.date_str_to_datetime(data)
-        data_format = datetime.strftime(data_datetime, '%Y-%m-%d')
+        data_format = datetime.datetime.strftime(data_datetime, '%Y-%m-%d')
         if turno not in (1, 2, 3, '1', '2', '3'):
             raise ValueError('O parâmetro turno deve receber o valor 1, 2 ou 3.')
         turno_format = str(turno)
@@ -78,7 +80,7 @@ class ServicoDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            data_format = datetime.strftime(servico_para_ser_removido.data, '%Y-%m-%d')
+            data_format = datetime.datetime.strftime(servico_para_ser_removido.data, '%Y-%m-%d')
 
             rm_query = "DELETE FROM servicos WHERE data = '" + data_format + "' AND turno = " + str(servico_para_ser_removido.turno)
 
@@ -102,15 +104,33 @@ class ServicoDAO:
             if 'conn' in locals():
                 conn.close()
 
-    def get_servicos(self):
+    def get_servicos(self, data_inicio=None, data_fim=None):
+        if isinstance(data_inicio, datetime.date) and isinstance(data_fim, datetime.date):
+            data_inicio_str_format = datetime.datetime.strftime(data_inicio, '%Y-%m-%d')
+            data_fim_str_format = datetime.datetime.strftime(data_fim, '%Y-%m-%d')
+            complemento_query = "WHERE data BETWEEN '{}' AND '{}'".format(data_inicio_str_format, data_fim_str_format)
+
+        elif isinstance(data_inicio, str) and isinstance(data_fim, str):
+            data_inicio_datetime = functions.date_str_to_datetime(data_inicio_str)
+            data_fim_datetime = functions.date_str_to_datetime(data_fim_str)
+            data_inicio_str_format = datetime.datetime.strftime(data_inicio_datetime, '%Y-%m-%d')
+            data_fim_str_format = datetime.datetime.strftime(data_fim_datetime, '%Y-%m-%d')
+            complemento_query = "WHERE data BETWEEN '{}' AND '{}'".format(data_inicio_str_format, data_fim_str_format)
+
+        elif data_inicio == None and data_fim == None:
+            complemento_query = ''
+        
+        else:
+            raise ValueError('Os parâmetros data_inicio e data_fim devem ambos serem deixados em branco ou receberem argumentos do mesmo tipo, str ou datetime.date.')
+    
         try:
             conn_inst = connection.Connection()
             conn = conn_inst.get_connection()
             cursor = conn.cursor()
 
-            getServicosQuery = 'SELECT * FROM servicos'
+            get_servicos_query = 'SELECT * FROM servicos {} ORDER BY data'.format(complemento_query, )
 
-            cursor.execute(getServicosQuery)
+            cursor.execute(get_servicos_query)
             results = cursor.fetchall()
             servicos_list = list()
             if len(results):                
@@ -133,17 +153,20 @@ class ServicoDAO:
             if 'conn' in locals():
                 conn.close()
     
-    def servico_update(self, data_atual, turno_atual, nome_de_guerra=None, data=None, turno=None, nome_estagio=None):
+    def servico_update(self, data_atual, turno_atual, data=None, turno=None, nome_de_guerra=None, nome_estagio=None):
         servico_para_ser_atualizado = self.get_servico(data_atual, turno_atual)
         if servico_para_ser_atualizado == None:
             raise ValueError('Não há servico para ser atualizado, com a data e o turno informados (' + data_atual + ', ' + str(turno_atual) + 'º turno).')
 
         servico_atualizador = servico.Servico(
-            nome_de_guerra if nome_de_guerra != None else servico_para_ser_atualizado.nome_de_guerra,
-            data if data != None else datetime.strftime(servico_para_ser_atualizado.data, '%Y-%m-%d'),
+            data if data != None else datetime.datetime.strftime(servico_para_ser_atualizado.data, '%Y-%m-%d'),
             turno if turno != None else servico_para_ser_atualizado.turno,
+            nome_de_guerra if nome_de_guerra != None else servico_para_ser_atualizado.nome_de_guerra,
             nome_estagio if nome_estagio != None else servico_para_ser_atualizado.nome_estagio            
         )
+        if servico_atualizador.nome_de_guerra == 'DEFAULT':
+            raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
+
         if servico_para_ser_atualizado == servico_atualizador:
             raise myexceptions.LogicException('Não foi informado nenhum dado novo para atualizar o serviço.')
                 
@@ -152,13 +175,13 @@ class ServicoDAO:
             if value == None:
                 continue
             if key == 'data':
-                complemento_query += key + " = '" + datetime.strftime(servico_atualizador.data, '%Y-%m-%d') + "', "
+                complemento_query += key + " = '" + datetime.datetime.strftime(servico_atualizador.data, '%Y-%m-%d') + "', "
             else:
                 complemento_query += key + " = '" + str(value) + "', "
         complemento_query = complemento_query[:-2]
         
         update_query = 'UPDATE servicos SET ' + complemento_query + " WHERE " +\
-            "data = '" + datetime.strftime(servico_para_ser_atualizado.data, '%Y-%m-%d') + "' AND " +\
+            "data = '" + datetime.datetime.strftime(servico_para_ser_atualizado.data, '%Y-%m-%d') + "' AND " +\
             "turno = " + str(servico_para_ser_atualizado.turno)
 
         try:
@@ -172,8 +195,8 @@ class ServicoDAO:
                 serv_antes_dict = servico_para_ser_atualizado.__repr__()
                 serv_depois_dict = servico_atualizador.__repr__()
 
-                serv_antes_dict['data'] = datetime.strftime(serv_antes_dict['data'], '%d/%m/%Y')
-                serv_depois_dict['data'] = datetime.strftime(serv_depois_dict['data'], '%d/%m/%Y')
+                serv_antes_dict['data'] = datetime.datetime.strftime(serv_antes_dict['data'], '%d/%m/%Y')
+                serv_depois_dict['data'] = datetime.datetime.strftime(serv_depois_dict['data'], '%d/%m/%Y')
                 
                 print('Serviço atualizado com sucesso: ')
                 for attr, value in serv_antes_dict.items():
@@ -216,14 +239,14 @@ class ServicoDAO:
                 conn.close()
 
         qtd_de_servicos_por_dia_dict = dict()
-        for el in qtd_de_servicos_por_dia_list:
+        for el in qtd_de_servicos_por_dia_list:            
             data = functions.date_str_to_datetime(el[0])
             qtd_de_servicos_por_dia_dict[data] = {'soma_turnos':el[1], 'cont_datas': el[2]}        
         return qtd_de_servicos_por_dia_dict
     
     def get_servicos_from_data(self, data_in_datetime):
-        data_in_datetime = datetime.strptime(data_in_datetime, '%d/%m/%Y')
-        dataFormat = datetime.strftime(data_in_datetime, '%Y-%m-%d')
+        data_in_datetime = datetime.datetime.strptime(data_in_datetime, '%d/%m/%Y')
+        dataFormat = datetime.datetime.strftime(data_in_datetime, '%Y-%m-%d')
         print(dataFormat)
         conn_inst = connection.Connection()
         conn = conn_inst.get_connection()
@@ -243,7 +266,7 @@ class ServicoDAO:
         while(True):                        
             if data in datasList:
                 if qtd_de_servicos_por_dia_dict[data]['soma_turnos'] == 6:
-                    data += datetime.timedelta(days=1)                    
+                    data += datetime.datetime.timedelta(days=1)                    
                 else:                    
                     return data
             else:

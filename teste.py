@@ -1,5 +1,5 @@
 from services import escalar
-from entities import filapormodalidade
+from entities import filapormodalidade, servico
 from dbdao import cpudao, impedimentodao, servicodao, feriadodao, ordenacaopormilitardao
 
 
@@ -115,8 +115,10 @@ print('sem_3', queue.getNext("sem_3")) """
 #cpu_dao.cpu_remove('NOVO CPU9')
 #cpu_dao.cpu_remove('NOVO CPU3')
 #_escalar = escalar.Escalar()
-datas_e_turnos = escalar.Escalar().get_dias_e_turnos_para_escalar()
-print(datas_e_turnos)
+escalar.Escalar().escalar_seg_a_dom()
+
+#_servico = servico.Servico('10/10/2020', 2, 'MADUREIRA', 'ASP GOULARD')
+
 
 #impedimento_dao = impedimentodao.ImpedimentoDAO()
 #impedimento_dao.impedimento_add('madureira', 'ferias', '04/02/2020', '20/08/2020', 'comentário madureira')

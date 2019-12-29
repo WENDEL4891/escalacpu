@@ -6,3 +6,6 @@ class BdOperationError(Exception):
 
 class LogicException(Exception):
     pass
+
+class OperationalException(Exception):
+    pass
