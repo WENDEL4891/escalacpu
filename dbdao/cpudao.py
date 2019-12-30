@@ -5,22 +5,39 @@ import myexceptions
 import copy
 
 class CpuDAO:
-    def cpu_add(self, pg, nome_completo, nome_de_guerra, funcao, curso, ano_base):        
+    
+    @property
+    def cpus(self):
+        self.__cpus = self.get_cpus()
+        return self.__cpus
+    
+    @property
+    def cpus_tm(self):
+        self.__cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
+        return self.__cpus_tm
+        
+
+    def cpu_add(self, pg, nome_completo, nome_de_guerra, funcao, curso, ano_base):
+        cpu_para_ser_incluido = cpu.Cpu(pg, nome_completo, nome_de_guerra, funcao, curso, ano_base)
+        if cpu_para_ser_incluido.funcao == 'TM':
+            if len(self.cpus_tm) == 2:
+                cpu_tm1 = '{} {}'.format(self.cpus_tm[0].pg, self.cpus_tm[0].nome_de_guerra)
+                cpu_tm2 = '{} {}'.format(self.cpus_tm[1].pg, self.cpus_tm[1].nome_de_guerra)
+                raise ValueError("Só podem ser incluídos 2 cpus com função 'TM'. Já há dois cadastrados: {} e {}.".format(cpu_tm1, cpu_tm2))
         try:
-            cpu_instance = cpu.Cpu(pg, nome_completo, nome_de_guerra, funcao, curso, ano_base)
             
             connection_conn = connection.Connection()
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
             
             addQuery = "INSERT INTO CPUs (pg, nome_completo, nome_de_guerra, funcao, curso, ano_base) VALUES (?, ?, ?, ?, ?, ?)"
-            params = (cpu_instance.pg, cpu_instance.nome_completo, cpu_instance.nome_de_guerra, cpu_instance.funcao, cpu_instance.curso, cpu_instance.ano_base)
+            params = (cpu_para_ser_incluido.pg, cpu_para_ser_incluido.nome_completo, cpu_para_ser_incluido.nome_de_guerra, cpu_para_ser_incluido.funcao, cpu_para_ser_incluido.curso, cpu_para_ser_incluido.ano_base)
             
             cursor.execute(addQuery, params)
             conn.commit()
             if cursor.rowcount == 1:
                 print('Novo CPU cadastrado com sucesso: ')
-                for key, value in cpu_instance.__repr__().items():
+                for key, value in cpu_para_ser_incluido.__repr__().items():
                     print(key, value, sep=' > ')
                 print('\'' * 40 )
             else:
@@ -31,7 +48,7 @@ class CpuDAO:
             print(err)
             raise
         except sqlite3.IntegrityError as err:
-            print('Já existe um registro com o nome de guerra: ' + cpu_instance.nome_de_guerra)
+            print('Já existe um registro com o nome de guerra: ' + cpu_para_ser_incluido.nome_de_guerra)
             raise
         finally:
             if 'conn' in locals():
@@ -96,6 +113,12 @@ class CpuDAO:
                        
         if cpu_para_ser_atualizado == novo_cpu_obj:
             raise myexceptions.LogicException('Não foi informado nenhum dado novo para atualização.')
+
+        if novo_cpu_obj.funcao == 'TM':
+            if len(self.cpus_tm) == 2:
+                cpu_tm1 = '{} {}'.format(self.cpus_tm[0].pg, self.cpus_tm[0].nome_de_guerra)
+                cpu_tm2 = '{} {}'.format(self.cpus_tm[1].pg, self.cpus_tm[1].nome_de_guerra)
+                raise ValueError("Só podem ser incluídos 2 cpus com função 'TM'. Já há dois cadastrados: {} e {}.".format(cpu_tm1, cpu_tm2))
                         
         dados_para_atualizar_para_query = ''        
         
@@ -178,4 +201,4 @@ class CpuDAO:
             print(err)        
         finally:
             if 'conn' in locals():
-                conn.close()         
+                conn.close()
