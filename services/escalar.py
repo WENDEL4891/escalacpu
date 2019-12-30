@@ -105,12 +105,6 @@ class Escalar:
         servicos_tm_A_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), seg_dom_semana_anterior))
         servicos_tm_B_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), ter_semana_anterior))
 
-        for i in servicos_tm_A_semana_anterior:
-            print(i)
-        print('-' * 40)
-        for i in servicos_tm_B_semana_anterior:
-            print(i)
-
         
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), servicos_para_completar_list))
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), servicos_para_completar_list))
@@ -125,7 +119,12 @@ class Escalar:
         servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', servicos_para_completar_list))
         servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', servicos_para_completar_list))
         servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', servicos_para_completar_list))
-
+        
+        dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
+        gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
+        
+        print(gerenciador_de_filas.fila_sex_3)
+        
 
 
         
@@ -214,10 +213,6 @@ class Escalar:
         
         
         
-        #dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
-        
-        
-        #gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
 
         
         

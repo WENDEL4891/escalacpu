@@ -5,10 +5,11 @@ import myexceptions
 import config
 from entities import cpu
 
-cpus = cpudao.CpuDAO().get_cpus()
-nomes_de_guerra = [cpu_instance.nome_de_guerra for cpu_instance in cpus]
 
 class Servico:
+    cpus = cpudao.CpuDAO().get_cpus()
+    nomes_de_guerra = list(map(lambda _cpu: _cpu.nome_de_guerra, cpus))
+
     def __init__(self, data, turno, _cpu='DEFAULT', nome_estagio=None):
         self.data = data
         self.turno = turno
@@ -50,9 +51,9 @@ class Servico:
         if isinstance(_cpu, cpu.Cpu):            
             self.__cpu = _cpu
         elif isinstance(_cpu, str):
-            if not _cpu.upper() in nomes_de_guerra:
+            if not _cpu.upper() in self.nomes_de_guerra:
                 if not _cpu.upper() == 'DEFAULT':
-                    raise ValueError('Nome de guerra não cadastrado: {}.'.format(nome_de_guerra))
+                    raise ValueError('Nome de guerra não cadastrado: {}.'.format(_cpu.upper()))
             self.__cpu = cpudao.CpuDAO().get_cpu(_cpu.upper())
         else:    
             raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string ou um objeto da classe cpu.Cpu.')

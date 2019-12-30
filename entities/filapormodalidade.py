@@ -16,6 +16,7 @@ class FilaPorModalidade:
             raise ValueError('Somente são aceitas modalidades dentre as seguintes: {}'.format(', '.join(self.modalidades_validas)))
         self.modalidade = modalidade.lower()
         self.fila = dict()
+        self.ultimo_servico_da_fila = None
         
     
     @property
@@ -33,22 +34,30 @@ class FilaPorModalidade:
         self.__cpus_sem_tm = list(filter(lambda _cpu: not _cpu.funcao == 'TM', self.cpus))
         return self.__cpus_sem_tm
     
+    @property
     def cpus_tm(self):
         self.__cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
         return self.__cpus_tm
+    
+    @property
+    def nomes_de_guerra(self):
+        self.__nomes_de_guerra = list(map(lambda _cpu: _cpu.nome_de_guerra, self.cpus_sem_tm))
+        return self.__nomes_de_guerra
+
 
     
-    def membro_add_ultimo_para_primeiro(self, _cpu):
-        if isinstance(_cpu, cpu.Cpu):
-            cpu_Cpu = _cpu
-        elif isinstance(_cpu, str):
-            cpu_Cpu = self.cpu_dao.get_cpu(_cpu)
-            if cpu_Cpu = None:
-                raise ValueError('O argumento informado ({}) não é um nome de guerra cadastrado.'.format(_cpu))
-        else:
-            raise TypeError('O parâmetro _cpu deve receber um argumento do tipo cpu.CPU ou uma string, com um nome de guerra já cadastrado.')
+    def membro_add_ultimo_para_primeiro(self, _servico):
+        if not isinstance(_servico.cpu, cpu.Cpu):        
+            raise TypeError('O parâmetro _servico deve receber um objeto do tipo servico.Servico.')
         
-        qtd_membros = len(self.cpus_sem_tm)        
+        nomes_de_guerra_fila = list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila.values()))
+        if not _servico.cpu.nome_de_guerra in nomes_de_guerra_fila:
+            ordem = len(self.cpus_sem_tm) - len(self.fila)
+            self.fila[ordem] = _servico.cpu
+            if ordem == 1:
+                self.ultimo_servico_da_fila = _servico
+
+
         #IMPLEMENTAR A PARTIR DAQUI
         #if not nome_de_guerra.upper() in self.fila.values():
         #    final_da_fila = ultima_posicao + 1
@@ -61,10 +70,11 @@ class FilaPorModalidade:
         #    self.fila[ultima_posicao] = nome_de_guerra.upper()
     
     def membro_add_final_da_fila(self, nome_de_guerra):
+        
         ultima_posicao = len(self.fila)
         if not isinstance(nome_de_guerra, str):
             raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')        
-        if not nome_de_guerra.upper() in nomes_de_guerra:
+        if not nome_de_guerra.upper() in self.nomes_de_guerra:
             raise ValueError('O argumento infomado, no parâmetro nome_de_guerra ({}) não está cadastrado.'.format(nome_de_guerra.upper()))        
         if not nome_de_guerra.upper() in self.fila.values():
             final_da_fila = ultima_posicao + 1
@@ -94,7 +104,7 @@ class FilaPorModalidade:
     def __str__(self):
         self.fila = dict(sorted(self.fila.items()))
         aux = 'Fila = {} '.format(self.modalidade) + '{\n'
-        for ordem, militar in self.fila.items():
-            aux += '\t{}: {}\n'.format(ordem, militar)
+        for ordem, cpu in self.fila.items():
+            aux += '\t{}: {} {}\n'.format(ordem, cpu.pg, cpu.nome_de_guerra)
         aux += '}'
         return aux
