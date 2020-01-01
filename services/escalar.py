@@ -106,24 +106,32 @@ class Escalar:
         servicos_tm_B_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), ter_semana_anterior))
 
         
-        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), servicos_para_completar_list))
-        servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), servicos_para_completar_list))
-        servicos_para_completar_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', servicos_para_completar_list))
-        servicos_para_completar_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', servicos_para_completar_list))
-        servicos_para_completar_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', servicos_para_completar_list))
-        servicos_para_completar_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', servicos_para_completar_list))
-        servicos_para_completar_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', servicos_para_completar_list))
-        servicos_para_completar_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', servicos_para_completar_list))
-        servicos_para_completar_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', servicos_para_completar_list))
-        servicos_para_completar_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', servicos_para_completar_list))
-        servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', servicos_para_completar_list))
-        servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', servicos_para_completar_list))
-        servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', servicos_para_completar_list))
+        #servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), servicos_para_completar_list))
+        #servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), servicos_para_completar_list))
+        #servicos_para_completar_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', servicos_para_completar_list))
+        #servicos_para_completar_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', servicos_para_completar_list))
+        #servicos_para_completar_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', servicos_para_completar_list))
+        #servicos_para_completar_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', servicos_para_completar_list))
+        #servicos_para_completar_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', servicos_para_completar_list))
+        #servicos_para_completar_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', servicos_para_completar_list))
+        #servicos_para_completar_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', servicos_para_completar_list))
+        #servicos_para_completar_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', servicos_para_completar_list))
+        #servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', servicos_para_completar_list))
+        #servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', servicos_para_completar_list))
+        #servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', servicos_para_completar_list))
         
         dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
         gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
+                
+        #for c in gerenciador_de_filas.fila_fds.fila:
+        #    print(c.nome_de_guerra, c.fds_em_sequencia)
         
-        print(gerenciador_de_filas.fila_sex_3)
+        for _cpu in gerenciador_de_filas.fila_fds.fila:
+            print(_cpu.nome_de_guerra)
+            print(_cpu.get_fds_em_sequencia())
+        
+
+            
         
 
 

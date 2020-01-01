@@ -1,5 +1,5 @@
 import datetime
-from entities import enums
+from entities import enums, servico
 
 postos_e_graduacoes = [member.value for name, member in enums.PgEnum.__members__.items()]
 funcoes = [member.value for name, member in enums.FuncaoEnum.__members__.items()]
@@ -13,6 +13,8 @@ class Cpu:
         self.funcao = funcao
         self.curso = curso
         self.ano_base = ano_base
+        self.servicos_fds = list()        
+        
     
     @property
     def pg(self):
@@ -36,8 +38,9 @@ class Cpu:
     
     @property
     def ano_base(self):
-        return self.__ano_base    
-       
+        return self.__ano_base
+    
+    
     @pg.setter
     def pg(self, pg):
         if not isinstance(pg, str):
@@ -96,7 +99,21 @@ class Cpu:
             raise ValueError('Ano base inválido.')
         self.__ano_base = ano_base
     
+    def get_fds_em_sequencia(self):                
+        fds_em_sequencia = 0
+        if not self.servicos_fds:
+            return fds_em_sequencia
 
+        ultimo_servico_fds = max(self.servicos_fds)
+        ultimo_fds_num = ultimo_servico_fds.data.isocalendar()[1]        
+        for _servico in sorted(self.servicos_fds, reverse=True):
+            if _servico.data.isocalendar()[1] == ultimo_fds_num:
+                fds_em_sequencia += 1
+                ultimo_fds_num -= 1
+            else:
+                return fds_em_sequencia           
+        
+  
     def __eq__(self, other_cpu):
         if other_cpu == None:
             return False

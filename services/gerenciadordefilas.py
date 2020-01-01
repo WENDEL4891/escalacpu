@@ -3,22 +3,24 @@ from entities import filapormodalidade
 
 
 class GerenciadorDeFilas:
+    cpu_dao = cpudao.CpuDAO()
+
     def __init__(self, data_inicio, data_fim):        
         self.servicos_em_ordem_decrescente = {'data_inicio': data_inicio, 'data_fim': data_fim}       
 
         self.fila_fds = 'fds'
-        self.fila_semana = 'semana'
-        self.fila_seg_12 = 'seg_12'
-        self.fila_seg_3 = 'seg_3'
-        self.fila_ter_qui_sex_12 = 'ter_qui_sex_12'
-        self.fila_qua_12 = 'qua_12'
-        self.fila_ter_3 = 'ter_3'
-        self.fila_qua_3 = 'qua_3'
-        self.fila_qui_3 = 'qui_3'
-        self.fila_sex_3 = 'sex_3'
-        self.fila_fds_12 = 'fds_12'
-        self.fila_sab_3 = 'sab_3'
-        self.fila_dom_3 = 'dom_3'
+        #self.fila_semana = 'semana'
+        #self.fila_seg_12 = 'seg_12'
+        #self.fila_seg_3 = 'seg_3'
+        #self.fila_ter_qui_sex_12 = 'ter_qui_sex_12'
+        #self.fila_qua_12 = 'qua_12'
+        #self.fila_ter_3 = 'ter_3'
+        #self.fila_qua_3 = 'qua_3'
+        #self.fila_qui_3 = 'qui_3'
+        #self.fila_sex_3 = 'sex_3'
+        #self.fila_fds_12 = 'fds_12'
+        #self.fila_sab_3 = 'sab_3'
+        #self.fila_dom_3 = 'dom_3'
     
     
     @property
@@ -30,6 +32,7 @@ class GerenciadorDeFilas:
     def fila_fds(self):        
         return self.__fila_fds
 
+        """     
     @property    
     def fila_semana(self):        
         return self.__fila_semana
@@ -76,7 +79,7 @@ class GerenciadorDeFilas:
 
     @property    
     def fila_dom_3(self):        
-        return self.__fila_dom_3
+        return self.__fila_dom_3 """
 
 
     @servicos_em_ordem_decrescente.setter
@@ -89,13 +92,31 @@ class GerenciadorDeFilas:
     @fila_fds.setter
     def fila_fds(self, modalidade):        
         servicos_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_em_ordem_decrescente))
-        fila_fds = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_fds:            
+
+        fila_fds = filapormodalidade.FilaPorModalidade(modalidade)        
+        for _servico in servicos_fds:
             if _servico.cpu.funcao != 'TM':
                 fila_fds.membro_add_ultimo_para_primeiro(_servico)
+        if len(fila_fds.fila) < len(self.cpu_dao.cpus_sem_tm):
+            for _cpu in self.cpu_dao.cpus_sem_tm:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
+                    fila_fds.membro_add_primeiro_para_ultimo(_cpu)
+                
+        #for _cpu in fila_fds.fila:            
+        #    semana_aux = ultima_semana
+        #    for _servico in _cpu.servicos_fds:
+        #        semana = _servico.data.isocalendar()[1]
+        #        print(semana, semana_aux)
+        #        if semana == semana_aux:
+        #            _cpu.fds_em_sequencia += 1
+        #            semana_aux -= 1
+        #        else:
+        #            continue
+        #    print('-' * 40)
         self.__fila_fds = fila_fds        
         
-    @fila_semana.setter    
+        """ 
+        @fila_semana.setter    
     def fila_semana(self, modalidade):        
         servicos_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_em_ordem_decrescente))
         fila_semana = filapormodalidade.FilaPorModalidade(modalidade)
@@ -201,4 +222,4 @@ class GerenciadorDeFilas:
         for _servico in servicos_dom_3:            
             if _servico.cpu.funcao != 'TM':
                 fila_dom_3.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_dom_3 = fila_dom_3
+        self.__fila_dom_3 = fila_dom_3 """

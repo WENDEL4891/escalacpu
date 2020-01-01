@@ -15,6 +15,11 @@ class CpuDAO:
     def cpus_tm(self):
         self.__cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
         return self.__cpus_tm
+    
+    @property
+    def cpus_sem_tm(self):
+        self.__cpus_sem_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
+        return self.__cpus_sem_tm
         
 
     def cpu_add(self, pg, nome_completo, nome_de_guerra, funcao, curso, ano_base):

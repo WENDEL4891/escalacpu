@@ -1,5 +1,5 @@
 from dbdao import cpudao
-from entities import cpu
+from entities import cpu, servico
 import services.functions
 import myexceptions
 import copy
@@ -10,12 +10,8 @@ class FilaPorModalidade:
     cpu_dao = cpudao.CpuDAO()
 
     def __init__(self, modalidade):
-        if not isinstance(modalidade, str):
-            raise ValueError('O parâmetro modalidade deve receber um argumento do tipo string.')
-        if modalidade.lower() not in self.modalidades_validas:
-            raise ValueError('Somente são aceitas modalidades dentre as seguintes: {}'.format(', '.join(self.modalidades_validas)))
-        self.modalidade = modalidade.lower()
-        self.fila = dict()
+        self.modalidade = modalidade      
+        self.fila = list()  
         self.ultimo_servico_da_fila = None
         
     
@@ -24,6 +20,10 @@ class FilaPorModalidade:
         self.__modalidades_validas = ('fds', 'semana', 'seg_12','seg_3','ter_qui_sex_12','qua_12','ter_3','qua_3','qui_3','sex_3','fds_12','sab_3','dom_3')
         return self.__modalidades_validas
     
+    @property
+    def modalidade(self):
+        return self.__modalidade
+
     @property
     def cpus(self):
         self.__cpus = copy.copy(self.cpu_dao.cpus)
@@ -44,33 +44,55 @@ class FilaPorModalidade:
         self.__nomes_de_guerra = list(map(lambda _cpu: _cpu.nome_de_guerra, self.cpus_sem_tm))
         return self.__nomes_de_guerra
 
-
+    @modalidade.setter
+    def modalidade(self, modalidade):
+        if not isinstance(modalidade, str):
+            raise ValueError('O parâmetro modalidade deve receber um argumento do tipo string.')
+        if modalidade.lower() not in self.modalidades_validas:
+            raise ValueError('Somente são aceitas modalidades dentre as seguintes: {}'.format(', '.join(self.modalidades_validas)))
+        self.__modalidade = modalidade.lower()
     
-    def membro_add_ultimo_para_primeiro(self, _servico):
-        if not isinstance(_servico.cpu, cpu.Cpu):        
-            raise TypeError('O parâmetro _servico deve receber um objeto do tipo servico.Servico.')
         
-        nomes_de_guerra_fila = list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila.values()))
-        if not _servico.cpu.nome_de_guerra in nomes_de_guerra_fila:
-            ordem = len(self.cpus_sem_tm) - len(self.fila)
-            self.fila[ordem] = _servico.cpu
-            if ordem == 1:
-                self.ultimo_servico_da_fila = _servico
-
-
-        #IMPLEMENTAR A PARTIR DAQUI
-        #if not nome_de_guerra.upper() in self.fila.values():
-        #    final_da_fila = ultima_posicao + 1
-        #    self.fila[final_da_fila] = nome_de_guerra.upper()
-        #else:                        
-        #    ordem_atual = services.functions.get_value_from_key_in_dict(self.fila, nome_de_guerra.upper())
-        #    for ordem, nome in self.fila.items():
-        #        if ordem > ordem_atual:
-        #            self.fila[ordem - 1] = nome
-        #    self.fila[ultima_posicao] = nome_de_guerra.upper()
+    def membro_add_ultimo_para_primeiro(self, _servico):
+        if not isinstance(_servico, servico.Servico):        
+            raise TypeError('O parâmetro _servico deve receber um objeto do tipo servico.Servico.')                         
+        
+        if not self.modalidade == 'fds':
+            if not cpu_para_incluir.nome_de_guerra in list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila)):
+                self.fila.append(cpu_para_incluir)
+        else:
+            cpu_not_in_fila = True
+            for _cpu in self.fila:
+                if _cpu.nome_de_guerra == _servico.cpu.nome_de_guerra:
+                    cpu_not_in_fila = False
+                    _cpu.servicos_fds.append(_servico)
+                    break
+            if cpu_not_in_fila:
+                servico_para_incluir = _servico.cpu
+                servico_para_incluir.servicos_fds.append(_servico)
+                self.fila.append(servico_para_incluir)
+        
+        
+    def fds_add(self, _servico):
+        cpu_ja_esta_na_fila_bool = False
+        for _cpu in self.fila:
+            if _cpu == _servico.cpu:                
+                cpu_ja_esta_na_fila_bool = True
+                _cpu.ultimo_servico_fds = _servico                
+                
+        if not cpu_ja_esta_na_fila_bool:            
+            cpu_para_incluir = _servico.cpu
+            cpu_para_incluir.ultimo_servico_fds = _servico
+            cpu_para_incluir.sequencia_servicos_fds = 1
+            self.fila.append(cpu_para_incluir)
+    
+    def membro_add_primeiro_para_ultimo(self, _cpu):
+        if not isinstance(_cpu, cpu.Cpu):
+            raise TypeError('O parâmetro _cpu deve receber um argumento do tipo cpu.Cpu. Foi passado {}.'.format(str(type(_cpu))))
+        self.fila.insert(0, _cpu)
+            
     
     def membro_add_final_da_fila(self, nome_de_guerra):
-        
         ultima_posicao = len(self.fila)
         if not isinstance(nome_de_guerra, str):
             raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string.')        
@@ -100,11 +122,11 @@ class FilaPorModalidade:
                 self.fila[ordem -1] = nome
         self.fila[qtd_de_membros] = next_membro
         return next_membro
-    
+            
     def __str__(self):
-        self.fila = dict(sorted(self.fila.items()))
-        aux = 'Fila = {} '.format(self.modalidade) + '{\n'
-        for ordem, cpu in self.fila.items():
-            aux += '\t{}: {} {}\n'.format(ordem, cpu.pg, cpu.nome_de_guerra)
-        aux += '}'
-        return aux
+        
+        fila_str = 'Fila = {} '.format(self.modalidade) + '{\n'
+        for i in range(len(self.fila)):
+            fila_str += '\t{}: {} {}\n'.format(i + 1, self.fila[i].pg, self.fila[i].nome_de_guerra)
+        fila_str += '}'
+        return fila_str
