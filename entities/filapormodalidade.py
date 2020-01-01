@@ -114,7 +114,7 @@ class FilaPorModalidade:
         if not qtd_de_membros:
             raise myexceptions.LogicException('Não há nenhum membro na fila {}'.format(self.modalidade))
         if not isinstance(pula, int):
-            raise TypeError('O parâmetro pula deve receber um argumento do tipo inteiro')
+            raise TypeError('O parâmetro pula é opcional. Quando for preenchido, deve receber um argumento do tipo int. Foi passado {}'.format(str(type(pula))))
         if pula >= qtd_de_membros:
             raise myexceptions.LogicException('Não é possível pular {} membros, pois o tamanho da fila é de {} membros.'.format(pula, qtd_de_membros))
         next_membro = self.fila[1 + pula]
@@ -123,6 +123,18 @@ class FilaPorModalidade:
                 self.fila[ordem -1] = nome
         self.fila[qtd_de_membros] = next_membro
         return next_membro
+    
+    def get_next_membro_show(self):
+        qtd_de_membros = len(self.fila)
+        if not qtd_de_membros:
+            raise myexceptions.LogicException('Não há nenhum membro na fila {}'.format(self.modalidade))
+        if not isinstance(pula, int):
+            raise TypeError('O parâmetro pula é opcional. Quando for preenchido, deve receber um argumento do tipo int. Foi passado {}'.format(str(type(pula))))
+        if pula >= qtd_de_membros:
+            raise myexceptions.LogicException('Não é possível pular {} membros, pois o tamanho da fila é de {} membros.'.format(pula, qtd_de_membros))
+        next_membro = self.fila[0 + pula]
+        return next_membro
+
             
     def __str__(self):
         

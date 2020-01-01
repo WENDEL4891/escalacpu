@@ -107,7 +107,8 @@ class GerenciadorDeFilas:
         )
 
         if len(fila_fds.fila) < len(self.cpu_dao.cpus_sem_tm):
-            for _cpu in self.cpu_dao.cpus_sem_tm:
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
                 if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
                     fila_fds.membro_add_primeiro_para_ultimo(_cpu)
         
