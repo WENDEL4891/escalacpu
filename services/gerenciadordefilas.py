@@ -1,12 +1,13 @@
 from dbdao import servicodao, cpudao
-from entities import filapormodalidade
+from entities import filapormodalidade, servico
+import datetime
 
 
 class GerenciadorDeFilas:
     cpu_dao = cpudao.CpuDAO()
 
     def __init__(self, data_inicio, data_fim):        
-        self.servicos_em_ordem_decrescente = {'data_inicio': data_inicio, 'data_fim': data_fim}       
+        self.servicos_em_ordem_decrescente = {'data_inicio': data_inicio, 'data_fim': data_fim}
 
         self.fila_fds = 'fds'
         #self.fila_semana = 'semana'
@@ -26,7 +27,6 @@ class GerenciadorDeFilas:
     @property
     def servicos_em_ordem_decrescente(self):
         return self.__servicos_em_ordem_decrescente
-
     
     @property
     def fila_fds(self):        
@@ -97,15 +97,39 @@ class GerenciadorDeFilas:
         for _servico in servicos_fds:
             if _servico.cpu.funcao != 'TM':
                 fila_fds.membro_add_ultimo_para_primeiro(_servico)
+        
+        fila_fds.fila.sort(
+            key = lambda _cpu: (
+                max(list(map(self.number_week_and_year, _cpu.servicos_fds))),
+                _cpu.get_fds_em_sequencia(),
+                max(list(map(lambda _servico: _servico, _cpu.servicos_fds)))
+            )
+        )
+
         if len(fila_fds.fila) < len(self.cpu_dao.cpus_sem_tm):
             for _cpu in self.cpu_dao.cpus_sem_tm:
                 if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
                     fila_fds.membro_add_primeiro_para_ultimo(_cpu)
+        
+        self.__fila_fds = fila_fds
+
+
+    def number_week_and_year(self, _servico):
+        if not isinstance(_servico, servico.Servico):
+            raise TypeError('O parâmetro _servico deve receber um argumento do tipo servico.Servico. Foi passado {}.'.format(str(type(_servico))))
+        
+        number_year_and_week = _servico.data.isocalendar()[:2]
+        year_str = str(number_year_and_week[0])
+        week_str = str(number_year_and_week[1]) if number_year_and_week[1] > 9 else '0{}'.format(number_year_and_week[1])
+        year_mais_week_str = year_str + week_str
+        year_mais_week_int = int(year_mais_week_str)
+        return year_mais_week_int
+            
                 
         #for _cpu in fila_fds.fila:            
         #    semana_aux = ultima_semana
         #    for _servico in _cpu.servicos_fds:
-        #        semana = _servico.data.isocalendar()[1]
+        #        semana = _servico._servico..isocalendar()[1]
         #        print(semana, semana_aux)
         #        if semana == semana_aux:
         #            _cpu.fds_em_sequencia += 1
@@ -113,7 +137,6 @@ class GerenciadorDeFilas:
         #        else:
         #            continue
         #    print('-' * 40)
-        self.__fila_fds = fila_fds        
         
         """ 
         @fila_semana.setter    

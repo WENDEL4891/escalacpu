@@ -101,17 +101,26 @@ class Cpu:
     
     def get_fds_em_sequencia(self):                
         fds_em_sequencia = 0
-        if not self.servicos_fds:
+        if not len(self.servicos_fds):
             return fds_em_sequencia
-
-        ultimo_servico_fds = max(self.servicos_fds)
-        ultimo_fds_num = ultimo_servico_fds.data.isocalendar()[1]        
-        for _servico in sorted(self.servicos_fds, reverse=True):
-            if _servico.data.isocalendar()[1] == ultimo_fds_num:
+        
+        number_year_and_week_todos_os_servicos = list(map(lambda _servico: _servico.data.isocalendar()[:2], self.servicos_fds))
+        number_year_and_week_todos_os_servicos.sort(reverse=True, key= lambda l: (l[0], l[1]))
+        data_ultimo_servico = max(list(map(lambda _servico: _servico.data, self.servicos_fds)))
+        
+        
+        year_and_week_ultima_semana = data_ultimo_servico.isocalendar()[:2]
+        for year_and_week in number_year_and_week_todos_os_servicos:            
+            if year_and_week == year_and_week_ultima_semana:
                 fds_em_sequencia += 1
-                ultimo_fds_num -= 1
             else:
-                return fds_em_sequencia           
+                data_ultimo_servico -= datetime.timedelta(days=7)
+                year_and_week_ultima_semana = data_ultimo_servico.isocalendar()[:2]
+                if year_and_week == year_and_week_ultima_semana:
+                    fds_em_sequencia += 1
+                else:
+                    break
+        return fds_em_sequencia
         
   
     def __eq__(self, other_cpu):

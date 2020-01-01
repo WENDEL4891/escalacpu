@@ -127,8 +127,11 @@ class Escalar:
         #    print(c.nome_de_guerra, c.fds_em_sequencia)
         
         for _cpu in gerenciador_de_filas.fila_fds.fila:
-            print(_cpu.nome_de_guerra)
-            print(_cpu.get_fds_em_sequencia())
+            print('{:10} | fds em sequencia > {}'.format(_cpu.nome_de_guerra, _cpu.get_fds_em_sequencia()))
+            print(max(_cpu.servicos_fds) if len(_cpu.servicos_fds) else '---')
+            print('-' * 40)
+        print(gerenciador_de_filas.fila_fds)
+
         
 
             

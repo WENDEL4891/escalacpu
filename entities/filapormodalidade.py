@@ -47,6 +47,7 @@ class FilaPorModalidade:
     @modalidade.setter
     def modalidade(self, modalidade):
         if not isinstance(modalidade, str):
+
             raise ValueError('O parâmetro modalidade deve receber um argumento do tipo string.')
         if modalidade.lower() not in self.modalidades_validas:
             raise ValueError('Somente são aceitas modalidades dentre as seguintes: {}'.format(', '.join(self.modalidades_validas)))
