@@ -131,6 +131,8 @@ class Escalar:
             print(max(_cpu.servicos_fds) if len(_cpu.servicos_fds) else '---')
             print('-' * 40)
         print(gerenciador_de_filas.fila_fds)
+        print(gerenciador_de_filas.fila_fds.get_next_membro_show())
+
 
         
 

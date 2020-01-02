@@ -59,8 +59,8 @@ class FilaPorModalidade:
             raise TypeError('O parâmetro _servico deve receber um objeto do tipo servico.Servico.')                         
         
         if not self.modalidade == 'fds':
-            if not cpu_para_incluir.nome_de_guerra in list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila)):
-                self.fila.append(cpu_para_incluir)
+            if not _servico.cpu.nome_de_guerra in list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila)):
+                self.fila.append(_servico.cpu)
         else:
             cpu_not_in_fila = True
             for _cpu in self.fila:
@@ -124,7 +124,7 @@ class FilaPorModalidade:
         self.fila[qtd_de_membros] = next_membro
         return next_membro
     
-    def get_next_membro_show(self):
+    def get_next_membro_show(self, pula=0):
         qtd_de_membros = len(self.fila)
         if not qtd_de_membros:
             raise myexceptions.LogicException('Não há nenhum membro na fila {}'.format(self.modalidade))

@@ -99,7 +99,7 @@ class Servico:
     def is_weekend(self):
         weekend = ('sabado', 'domingo')
         weekday = ('segunda', 'terca', 'quarta', 'quinta', 'sexta')
-        if self.get_weekday() in weekend:
+        if (self.get_weekday() in weekend) or self.is_sex_3():
             return True
         if self.get_weekday() in weekday:
             return False
@@ -107,6 +107,11 @@ class Servico:
     
     def get_weekday(self):
         return config.dias_da_semana[self.data.weekday()]
+
+    def is_sex_3(self):
+        if (self.data.weekday() == 4) and (self.turno == 3):
+            return True
+        return False
     
     def __str__(self):
         return 'Data: {} | Turno: {} | Nome de guerra: {}{}'.format(

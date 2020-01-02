@@ -8,6 +8,7 @@ class GerenciadorDeFilas:
 
     def __init__(self, data_inicio, data_fim):        
         self.servicos_em_ordem_decrescente = {'data_inicio': data_inicio, 'data_fim': data_fim}
+        self.servicos_em_ordem_decrescente_sem_tm = self.servicos_em_ordem_decrescente
 
         self.fila_fds = 'fds'
         #self.fila_semana = 'semana'
@@ -29,10 +30,14 @@ class GerenciadorDeFilas:
         return self.__servicos_em_ordem_decrescente
     
     @property
+    def servicos_em_ordem_decrescente_sem_tm(self):
+        return self.__servicos_em_ordem_decrescente_sem_tm
+    
+    @property
     def fila_fds(self):        
         return self.__fila_fds
 
-        """     
+            
     @property    
     def fila_semana(self):        
         return self.__fila_semana
@@ -79,7 +84,7 @@ class GerenciadorDeFilas:
 
     @property    
     def fila_dom_3(self):        
-        return self.__fila_dom_3 """
+        return self.__fila_dom_3
 
 
     @servicos_em_ordem_decrescente.setter
@@ -87,16 +92,20 @@ class GerenciadorDeFilas:
         servicos_em_ordem_decrescente = servicodao.ServicoDAO().get_servicos(datas_dict['data_inicio'], datas_dict['data_fim'])
         servicos_em_ordem_decrescente.sort(reverse=True)                   
         self.__servicos_em_ordem_decrescente = servicos_em_ordem_decrescente
-
     
+    
+    @servicos_em_ordem_decrescente_sem_tm.setter
+    def servicos_em_ordem_decrescente_sem_tm(self, servicos):        
+        self.__servicos_em_ordem_decrescente_sem_tm = list(filter(lambda _servico: _servico.cpu.funcao != 'TM', servicos))
+
+
     @fila_fds.setter
     def fila_fds(self, modalidade):        
-        servicos_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_em_ordem_decrescente))
+        servicos_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_em_ordem_decrescente_sem_tm))
 
         fila_fds = filapormodalidade.FilaPorModalidade(modalidade)        
-        for _servico in servicos_fds:
-            if _servico.cpu.funcao != 'TM':
-                fila_fds.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_fds:            
+            fila_fds.membro_add_ultimo_para_primeiro(_servico)
         
         fila_fds.fila.sort(
             key = lambda _cpu: (
@@ -110,8 +119,7 @@ class GerenciadorDeFilas:
             cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
             for _cpu in cpus_sem_tm_ordem_inversa:
                 if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
-                    fila_fds.membro_add_primeiro_para_ultimo(_cpu)
-        
+                    fila_fds.membro_add_primeiro_para_ultimo(_cpu)        
         self.__fila_fds = fila_fds
 
 
@@ -124,126 +132,103 @@ class GerenciadorDeFilas:
         week_str = str(number_year_and_week[1]) if number_year_and_week[1] > 9 else '0{}'.format(number_year_and_week[1])
         year_mais_week_str = year_str + week_str
         year_mais_week_int = int(year_mais_week_str)
-        return year_mais_week_int
-            
+        return year_mais_week_int           
                 
-        #for _cpu in fila_fds.fila:            
-        #    semana_aux = ultima_semana
-        #    for _servico in _cpu.servicos_fds:
-        #        semana = _servico._servico..isocalendar()[1]
-        #        print(semana, semana_aux)
-        #        if semana == semana_aux:
-        #            _cpu.fds_em_sequencia += 1
-        #            semana_aux -= 1
-        #        else:
-        #            continue
-        #    print('-' * 40)
         
-        """ 
-        @fila_semana.setter    
+        
+        
+    @fila_semana.setter
     def fila_semana(self, modalidade):        
-        servicos_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_em_ordem_decrescente))
+        servicos_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_em_ordem_decrescente_sem_tm))
         fila_semana = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_semana:            
-            if _servico.cpu.funcao != 'TM':
-                fila_semana.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_semana:                        
+            fila_semana.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_semana = fila_semana        
         
-    @fila_seg_12.setter    
+    @fila_seg_12.setter
     def fila_seg_12(self, modalidade):        
-        servicos_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', self.servicos_em_ordem_decrescente))
+        servicos_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', self.servicos_em_ordem_decrescente_sem_tm))
         fila_seg_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_seg_12:            
-            if _servico.cpu.funcao != 'TM':
-                fila_seg_12.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_seg_12:                        
+            fila_seg_12.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_seg_12 = fila_seg_12        
         
-    @fila_seg_3.setter    
+    @fila_seg_3.setter
     def fila_seg_3(self, modalidade):        
-        servicos_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', self.servicos_em_ordem_decrescente))
+        servicos_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_seg_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_seg_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_seg_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_seg_3:                        
+            fila_seg_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_seg_3 = fila_seg_3        
         
-    @fila_ter_qui_sex_12.setter    
+    @fila_ter_qui_sex_12.setter
     def fila_ter_qui_sex_12(self, modalidade):        
-        servicos_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', self.servicos_em_ordem_decrescente))
+        servicos_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', self.servicos_em_ordem_decrescente_sem_tm))
         fila_ter_qui_sex_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_ter_qui_sex_12:            
-            if _servico.cpu.funcao != 'TM':
-                fila_ter_qui_sex_12.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_ter_qui_sex_12:                        
+            fila_ter_qui_sex_12.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_ter_qui_sex_12 = fila_ter_qui_sex_12        
         
-    @fila_qua_12.setter    
+    @fila_qua_12.setter
     def fila_qua_12(self, modalidade):        
-        servicos_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', self.servicos_em_ordem_decrescente))
+        servicos_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', self.servicos_em_ordem_decrescente_sem_tm))
         fila_qua_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_qua_12:            
-            if _servico.cpu.funcao != 'TM':
-                fila_qua_12.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_qua_12:                        
+            fila_qua_12.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_qua_12 = fila_qua_12        
         
-    @fila_ter_3.setter    
+    @fila_ter_3.setter
     def fila_ter_3(self, modalidade):        
-        servicos_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', self.servicos_em_ordem_decrescente))
+        servicos_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_ter_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_ter_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_ter_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_ter_3:                        
+            fila_ter_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_ter_3 = fila_ter_3        
         
-    @fila_qua_3.setter    
+    @fila_qua_3.setter
     def fila_qua_3(self, modalidade):        
-        servicos_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', self.servicos_em_ordem_decrescente))
+        servicos_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_qua_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_qua_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_qua_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_qua_3:                        
+            fila_qua_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_qua_3 = fila_qua_3        
         
-    @fila_qui_3.setter    
+    @fila_qui_3.setter
     def fila_qui_3(self, modalidade):        
-        servicos_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', self.servicos_em_ordem_decrescente))
+        servicos_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_qui_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_qui_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_qui_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_qui_3:                        
+            fila_qui_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_qui_3 = fila_qui_3        
         
-    @fila_sex_3.setter    
+    @fila_sex_3.setter
     def fila_sex_3(self, modalidade):        
-        servicos_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', self.servicos_em_ordem_decrescente))
+        servicos_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_sex_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_sex_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_sex_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_sex_3:                        
+            fila_sex_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_sex_3 = fila_sex_3        
         
-    @fila_fds_12.setter    
+    @fila_fds_12.setter
     def fila_fds_12(self, modalidade):        
-        servicos_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', self.servicos_em_ordem_decrescente))
+        servicos_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', self.servicos_em_ordem_decrescente_sem_tm))
         fila_fds_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_fds_12:            
-            if _servico.cpu.funcao != 'TM':
-                fila_fds_12.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_fds_12:                        
+            fila_fds_12.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_fds_12 = fila_fds_12        
         
-    @fila_sab_3.setter    
+    @fila_sab_3.setter
     def fila_sab_3(self, modalidade):        
-        servicos_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_em_ordem_decrescente))
+        servicos_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_sab_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_sab_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_sab_3.membro_add_ultimo_para_primeiro(_servico)
+        for _servico in servicos_sab_3:                        
+            fila_sab_3.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_sab_3 = fila_sab_3        
         
-    @fila_dom_3.setter    
+    @fila_dom_3.setter
     def fila_dom_3(self, modalidade):        
-        servicos_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', self.servicos_em_ordem_decrescente))
+        servicos_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', self.servicos_em_ordem_decrescente_sem_tm))
         fila_dom_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_dom_3:            
-            if _servico.cpu.funcao != 'TM':
-                fila_dom_3.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_dom_3 = fila_dom_3 """
+        for _servico in servicos_dom_3:                        
+            fila_dom_3.membro_add_ultimo_para_primeiro(_servico)
+        self.__fila_dom_3 = fila_dom_3
