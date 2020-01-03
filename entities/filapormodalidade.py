@@ -17,7 +17,7 @@ class FilaPorModalidade:
     
     @property
     def modalidades_validas(self):
-        self.__modalidades_validas = ('fds', 'semana', 'seg_12','seg_3','ter_qui_sex_12','qua_12','ter_3','qua_3','qui_3','sex_3','fds_12','sab_3','dom_3')
+        self.__modalidades_validas = ('fds', 'semana', 'sem_12','sem_3','qua_2','qui_3','sex_2','sex_3','fds_12','sab_3','dom_3')
         return self.__modalidades_validas
     
     @property
@@ -124,7 +124,7 @@ class FilaPorModalidade:
         self.fila[qtd_de_membros] = next_membro
         return next_membro
     
-    def get_next_membro_show(self, pula=0):
+    def show_next_membro(self, pula=0):
         qtd_de_membros = len(self.fila)
         if not qtd_de_membros:
             raise myexceptions.LogicException('Não há nenhum membro na fila {}'.format(self.modalidade))

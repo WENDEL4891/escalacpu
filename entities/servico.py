@@ -71,34 +71,32 @@ class Servico:
             else:                
                 self.__nome_estagio = None
 
-    def get_modalidade(self):        
-        if self.get_weekday() == 'segunda' and self.turno in (1, 2):
-            return 'seg_12'
-        if self.get_weekday() == 'segunda' and self.turno == 3:
-            return 'seg_3'
-        if self.get_weekday() in ('terca', 'quinta', 'sexta') and self.turno in (1, 2):
-            return 'ter_qui_sex_12'
-        if self.get_weekday() == 'quarta' and self.turno in (1, 2):
-            return 'qua_12'
-        if self.get_weekday() == 'terca' and self.turno == 3:
-            return 'ter_3'
-        if self.get_weekday() == 'quarta' and self.turno == 3:
-            return 'qua_3'
-        if self.get_weekday() == 'quinta' and self.turno == 3:
+    def get_modalidade(self):
+        sem_12 = ('seg', 'ter', 'qua', 'qui', 'sex')
+        sem_2 = ('seg', 'ter', 'qui')
+        if ( self.get_weekday() in sem_12 and self.turno == 1 ) or ( self.get_weekday() in sem_2 and self.turno == 2 ):
+            return 'sem_12'        
+        if self.get_weekday() in ('seg', 'ter', 'qua') and self.turno == 3:
+            return 'sem_3'
+        if self.get_weekday() == 'qua' and self.turno == 2:
+            return 'qua_2'
+        if self.get_weekday() == 'qui' and self.turno == 3:
             return 'qui_3'
-        if self.get_weekday() == 'sexta' and self.turno == 3:
+        if self.get_weekday() == 'sex' and self.turno == 2:
+            return 'sex_2'
+        if self.get_weekday() == 'sex' and self.turno == 3:
             return 'sex_3'
-        if self.get_weekday() in ('sabado', 'domingo') and self.turno in (1, 2):
+        if self.get_weekday() in ('sab', 'dom') and self.turno in (1, 2):
             return 'fds_12'
-        if self.get_weekday() == 'sabado' and self.turno == 3:
+        if self.get_weekday() == 'sab' and self.turno == 3:
             return 'sab_3'
-        if self.get_weekday() == 'domingo' and self.turno == 3:
+        if self.get_weekday() == 'dom' and self.turno == 3:
             return 'dom_3'
         raise myexceptions.LogicException('O método Servico.get_modalidade() deve retornar alguma modalidade válida, considerando o dia da semana e o turno. Revisar função.')
-    
+            
     def is_weekend(self):
-        weekend = ('sabado', 'domingo')
-        weekday = ('segunda', 'terca', 'quarta', 'quinta', 'sexta')
+        weekend = ('sab', 'dom')
+        weekday = ('seg', 'ter', 'qua', 'qui', 'sex')
         if (self.get_weekday() in weekend) or self.is_sex_3():
             return True
         if self.get_weekday() in weekday:

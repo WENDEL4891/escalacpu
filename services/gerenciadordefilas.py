@@ -11,18 +11,16 @@ class GerenciadorDeFilas:
         self.servicos_em_ordem_decrescente_sem_tm = self.servicos_em_ordem_decrescente
 
         self.fila_fds = 'fds'
-        #self.fila_semana = 'semana'
-        #self.fila_seg_12 = 'seg_12'
-        #self.fila_seg_3 = 'seg_3'
-        #self.fila_ter_qui_sex_12 = 'ter_qui_sex_12'
-        #self.fila_qua_12 = 'qua_12'
-        #self.fila_ter_3 = 'ter_3'
-        #self.fila_qua_3 = 'qua_3'
-        #self.fila_qui_3 = 'qui_3'
-        #self.fila_sex_3 = 'sex_3'
-        #self.fila_fds_12 = 'fds_12'
-        #self.fila_sab_3 = 'sab_3'
-        #self.fila_dom_3 = 'dom_3'
+        self.fila_semana = 'semana'
+        self.fila_sem_12 = 'sem_12'
+        self.fila_sem_3 = 'sem_3'        
+        self.fila_qua_2 = 'qua_2'
+        self.fila_qui_3 = 'qui_3'
+        self.fila_sex_2 = 'sex_2'
+        self.fila_sex_3 = 'sex_3'
+        self.fila_fds_12 = 'fds_12'
+        self.fila_sab_3 = 'sab_3'
+        self.fila_dom_3 = 'dom_3'
     
     
     @property
@@ -43,33 +41,25 @@ class GerenciadorDeFilas:
         return self.__fila_semana
 
     @property    
-    def fila_seg_12(self):        
-        return self.__fila_seg_12
+    def fila_sem_12(self):        
+        return self.__fila_sem_12
 
     @property    
-    def fila_seg_3(self):        
-        return self.__fila_seg_3
+    def fila_sem_3(self):        
+        return self.__fila_sem_3
 
     @property    
-    def fila_ter_qui_sex_12(self):        
-        return self.__fila_ter_qui_sex_12
-
-    @property    
-    def fila_qua_12(self):        
-        return self.__fila_qua_12
-
-    @property    
-    def fila_ter_3(self):        
-        return self.__fila_ter_3
-
-    @property    
-    def fila_qua_3(self):        
-        return self.__fila_qua_3
+    def fila_qua_2(self):        
+        return self.__fila_qua_2
 
     @property    
     def fila_qui_3(self):        
         return self.__fila_qui_3
 
+    @property    
+    def fila_sex_2(self):        
+        return self.__fila_sex_2
+    
     @property    
     def fila_sex_3(self):        
         return self.__fila_sex_3
@@ -90,7 +80,7 @@ class GerenciadorDeFilas:
     @servicos_em_ordem_decrescente.setter
     def servicos_em_ordem_decrescente(self, datas_dict):        
         servicos_em_ordem_decrescente = servicodao.ServicoDAO().get_servicos(datas_dict['data_inicio'], datas_dict['data_fim'])
-        servicos_em_ordem_decrescente.sort(reverse=True)                   
+        servicos_em_ordem_decrescente.sort(reverse=True)
         self.__servicos_em_ordem_decrescente = servicos_em_ordem_decrescente
     
     
@@ -145,53 +135,39 @@ class GerenciadorDeFilas:
             fila_semana.membro_add_ultimo_para_primeiro(_servico)
         self.__fila_semana = fila_semana        
         
-    @fila_seg_12.setter
-    def fila_seg_12(self, modalidade):        
-        servicos_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_seg_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_seg_12:                        
-            fila_seg_12.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_seg_12 = fila_seg_12        
+    @fila_sem_12.setter
+    def fila_sem_12(self, modalidade):        
+        servicos_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_em_ordem_decrescente_sem_tm))        
+        fila_sem_12 = filapormodalidade.FilaPorModalidade(modalidade)
+        for _servico in servicos_sem_12:                        
+            fila_sem_12.membro_add_ultimo_para_primeiro(_servico)
+        self.__fila_sem_12 = fila_sem_12
         
-    @fila_seg_3.setter
-    def fila_seg_3(self, modalidade):        
-        servicos_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_seg_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_seg_3:                        
-            fila_seg_3.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_seg_3 = fila_seg_3        
+    @fila_sem_3.setter
+    def fila_sem_3(self, modalidade):        
+        servicos_sem_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_3', self.servicos_em_ordem_decrescente_sem_tm))        
+        fila_sem_3 = filapormodalidade.FilaPorModalidade(modalidade)
+        for _servico in servicos_sem_3:                        
+            fila_sem_3.membro_add_ultimo_para_primeiro(_servico)
+        self.__fila_sem_3 = fila_sem_3        
+         
         
-    @fila_ter_qui_sex_12.setter
-    def fila_ter_qui_sex_12(self, modalidade):        
-        servicos_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_ter_qui_sex_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_ter_qui_sex_12:                        
-            fila_ter_qui_sex_12.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_ter_qui_sex_12 = fila_ter_qui_sex_12        
+    @fila_qua_2.setter
+    def fila_qua_2(self, modalidade):        
+        servicos_qua_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_2', self.servicos_em_ordem_decrescente_sem_tm))
+        fila_qua_2 = filapormodalidade.FilaPorModalidade(modalidade)
+        for _servico in servicos_qua_2:                        
+            fila_qua_2.membro_add_ultimo_para_primeiro(_servico)
+        self.__fila_qua_2 = fila_qua_2        
+          
         
-    @fila_qua_12.setter
-    def fila_qua_12(self, modalidade):        
-        servicos_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_qua_12 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_qua_12:                        
-            fila_qua_12.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_qua_12 = fila_qua_12        
-        
-    @fila_ter_3.setter
-    def fila_ter_3(self, modalidade):        
-        servicos_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_ter_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_ter_3:                        
-            fila_ter_3.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_ter_3 = fila_ter_3        
-        
-    @fila_qua_3.setter
-    def fila_qua_3(self, modalidade):        
-        servicos_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', self.servicos_em_ordem_decrescente_sem_tm))
-        fila_qua_3 = filapormodalidade.FilaPorModalidade(modalidade)
-        for _servico in servicos_qua_3:                        
-            fila_qua_3.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_qua_3 = fila_qua_3        
+    @fila_sex_2.setter
+    def fila_sex_2(self, modalidade):        
+        servicos_sex_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_2', self.servicos_em_ordem_decrescente_sem_tm))
+        fila_sex_2 = filapormodalidade.FilaPorModalidade(modalidade)
+        for _servico in servicos_sex_2:                        
+            fila_sex_2.membro_add_ultimo_para_primeiro(_servico)
+        self.__fila_sex_2 = fila_sex_2        
         
     @fila_qui_3.setter
     def fila_qui_3(self, modalidade):        

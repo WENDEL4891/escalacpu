@@ -122,16 +122,24 @@ class Escalar:
         
         dois_meses_antes = max(dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
         gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(dias_e_turnos_seg_a_dom_dict))
+
+        servicos = sorted(gerenciador_de_filas.servicos_em_ordem_decrescente)
+        for s in servicos:
+            print(s)
+            print(s.get_modalidade())
+            print('-' * 40)
                 
         #for c in gerenciador_de_filas.fila_fds.fila:
         #    print(c.nome_de_guerra, c.fds_em_sequencia)
         
-        for _cpu in gerenciador_de_filas.fila_fds.fila:
-            print('{:10} | fds em sequencia > {}'.format(_cpu.nome_de_guerra, _cpu.get_fds_em_sequencia()))
-            print(max(_cpu.servicos_fds) if len(_cpu.servicos_fds) else '---')
-            print('-' * 40)
-        print(gerenciador_de_filas.fila_fds)
-        print(gerenciador_de_filas.fila_fds.get_next_membro_show())
+        #for _cpu in gerenciador_de_filas.fila_fds.fila:
+        #    print('{:10} | fds em sequencia > {}'.format(_cpu.nome_de_guerra, _cpu.get_fds_em_sequencia()))
+        #    print(max(_cpu.servicos_fds) if len(_cpu.servicos_fds) else '---')
+        #    print('-' * 40)
+        #print(gerenciador_de_filas.fila_fds)
+        #print(gerenciador_de_filas.fila_fds.show_next_membro())
+
+        
 
 
         
