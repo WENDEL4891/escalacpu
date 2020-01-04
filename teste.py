@@ -1,4 +1,4 @@
-from services import escalar
+from services import escalarsemana
 from entities import filapormodalidade, servico
 from dbdao import cpudao, impedimentodao, servicodao, feriadodao, ordenacaopormilitardao
 
@@ -11,7 +11,7 @@ print('sem_12', queue.getNext("sem_12"))
 print('sem_3', queue.getNext("sem_3")) """
 
 #servico_dao = servicodao.ServicoDAO()
-#servico_dao.servico_add('04/03/2021', 1, 'DIMITRi')
+#servico_dao.servico_add('03/02/2020', 1, 'DIMITRi')
 #servico_dao.servico_add('04/03/2021', 2, 'FERNANDA')
 #servico_dao.servico_add('04/03/2021', 3, 'CUNHA')
 #servico_dao.servico_add('05/01/2021', 1, 'MARCELO')
@@ -115,7 +115,7 @@ print('sem_3', queue.getNext("sem_3")) """
 #cpu_dao.cpu_remove('NOVO CPU9')
 #cpu_dao.cpu_remove('NOVO CPU3')
 #_escalar = escalar.Escalar()
-escalar.Escalar().escalar_seg_a_dom()
+escalarsemana.EscalarSemana().escalar_seg_a_dom()
 
 
 
@@ -145,7 +145,7 @@ escalar.Escalar().escalar_seg_a_dom()
 #print(impedimento.data_fim)
 
 #feriado_dao = feriadodao.FeriadoDAO()
-#feriado_dao.feriado_add('31/10/2020', 'Dia dos velhos')
+#feriado_dao.feriado_add('04/02/2020', 'Pré-Carnaval')
 #feriado_dao.feriado_remove('25/10/2020')
 #feriado_dao.feriado_remove('26/10/2020')
 #feriado_dao.feriado_remove('29/10/2020')

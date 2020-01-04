@@ -4,7 +4,7 @@ import myexceptions
 import copy
 import sys
 import services
-from datetime import datetime
+import datetime
 from services import functions
 
 class FeriadoDAO:
@@ -55,7 +55,7 @@ class FeriadoDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            rm_query = "DELETE FROM feriados WHERE data = '{}'".format(datetime.strftime(data_em_datetime, '%Y-%m-%d'))
+            rm_query = "DELETE FROM feriados WHERE data = '{}'".format(datetime.datetime.strftime(data_em_datetime, '%Y-%m-%d'))
 
             cursor.execute(rm_query)                       
             conn.commit()
@@ -142,7 +142,7 @@ class FeriadoDAO:
             conn = connection_conn.get_connection()
             cursor = conn.cursor()
 
-            selectCpuQuery = "SELECT * FROM feriados WHERE data = '" + datetime.strftime(data_em_datetime, '%Y-%m-%d') + "'"
+            selectCpuQuery = "SELECT * FROM feriados WHERE data = '" + datetime.datetime.strftime(data_em_datetime, '%Y-%m-%d') + "'"
 
             cursor.execute(selectCpuQuery)
             result = cursor.fetchall()
@@ -162,21 +162,31 @@ class FeriadoDAO:
                 conn.close()        
 
     def get_feriados(self, data_inicio='', data_fim=''):        
-        if not isinstance(data_inicio, str) and isinstance(data_fim, str):
-            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser strings.')
-        
-        if len(data_inicio) != len(data_fim):
-            raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')
-        
-        if not data_inicio == '':            
-            data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
-            data_fim_datetime = functions.date_str_to_datetime(data_fim)
-            if data_inicio_datetime > data_fim_datetime:
-                raise ValueError('A data fim deve ser superior a data de início.')                   
-            condicoes_select = "WHERE data BETWEEN '{:%Y-%m-%d}' AND '{:%Y-%m-%d}'".format(data_inicio_datetime, data_fim_datetime)
-        else:
-            condicoes_select = ''
+        if not (
+            ( isinstance(data_inicio, str) and isinstance(data_fim, str) )
+                or
+            ( isinstance(data_inicio, datetime.date) and isinstance(data_fim, datetime.date) )
 
+        ):        
+            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser ambos strings ou ambos datetime.date.')
+        
+        if isinstance(data_inicio, str):
+            if len(data_inicio) != len(data_fim):
+                raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')        
+            if not data_inicio == '':            
+                data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
+                data_fim_datetime = functions.date_str_to_datetime(data_fim)
+                if data_inicio_datetime > data_fim_datetime:
+                    raise ValueError('A data fim deve ser superior a data de início.')                   
+                condicoes_select = "WHERE data BETWEEN '{:%Y-%m-%d}' AND '{:%Y-%m-%d}'".format(data_inicio_datetime, data_fim_datetime)
+            else:
+                condicoes_select = ''
+        
+        if isinstance(data_inicio, datetime.date):                        
+            if data_inicio > data_fim:
+                raise ValueError('A data fim deve ser superior a data de início.')                   
+            condicoes_select = "WHERE data BETWEEN '{:%Y-%m-%d}' AND '{:%Y-%m-%d}'".format(data_inicio, data_fim)
+            
         select_query = "SELECT * FROM feriados {}".format(condicoes_select)
         
         try:

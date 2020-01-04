@@ -51,10 +51,12 @@ class Servico:
         if isinstance(_cpu, cpu.Cpu):            
             self.__cpu = _cpu
         elif isinstance(_cpu, str):
-            if not _cpu.upper() in self.nomes_de_guerra:
-                if not _cpu.upper() == 'DEFAULT':
-                    raise ValueError('Nome de guerra não cadastrado: {}.'.format(_cpu.upper()))
-            self.__cpu = cpudao.CpuDAO().get_cpu(_cpu.upper())
+            if _cpu.upper() == 'CPU_NONE':
+                self.__cpu = None
+            elif _cpu.upper() in self.nomes_de_guerra:
+                self.__cpu = cpudao.CpuDAO().get_cpu(_cpu.upper())
+            else:
+                raise ValueError('Nome de guerra não cadastrado: {}.'.format(_cpu.upper()))
         else:    
             raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string ou um objeto da classe cpu.Cpu.')
         
@@ -112,10 +114,10 @@ class Servico:
         return False
     
     def __str__(self):
-        return 'Data: {} | Turno: {} | Nome de guerra: {}{}'.format(
+        return 'Data: {} | Turno: {} | P/G Nome de guerra: {}{}'.format(
             datetime.datetime.strftime(self.data, '%d/%m/%Y'),
             str(self.turno),
-            '{} {}'.format(self.cpu.pg, self.cpu.nome_de_guerra),
+            ('{} {}'.format(self.cpu.pg, self.cpu.nome_de_guerra) if self.cpu != None else 'CPU_NONE'),
             (' | Nome estágio: ' + self.nome_estagio if self.nome_estagio != None else '')    
         ) 
         
