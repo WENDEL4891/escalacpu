@@ -82,8 +82,9 @@ class Impedimento:
                 'observacao': self.observacao}
     
     def __str__(self):
-        return 'nome_de_guerra: ' + self.nome_de_guerra +\
-                ' tipo: ' + self.tipo +\
-                ' data_inicio: ' + datetime.strftime(self.data_inicio, '%d/%m/%Y') +\
-                ' data_fim: ' + datetime.strftime(self.data_fim, '%d/%m/%Y') +\
-                ' observacao: ' + self.observacao
+        return  '{:16}: {}\n'.format('Nome de guerra', self.nome_de_guerra) +\
+                '{:16}: {}\n'.format('Tipo', self.tipo) +\
+                "{:16}: {:%d/%m/%Y}\n".format('Data início', self.data_inicio) +\
+                "{:16}: {:%d/%m/%Y}\n".format('Data fim', self.data_fim) +\
+                '{:16}: {}\n'.format('Observacao', self.observacao)
+                

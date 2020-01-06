@@ -1,5 +1,5 @@
 from db import connection
-from dbdao import servicodao, feriadodao, cpudao
+from dbdao import servicodao, feriadodao, cpudao, impedimentodao
 from entities import filapormodalidade, servico
 from services import functions, gerenciadordefilas
 import datetime
@@ -25,12 +25,37 @@ class EscalarSemana:
         self.data_domingo = self.data_sabado + datetime.timedelta(days=1)
 
         self.feriados = feriadodao.FeriadoDAO().get_feriados(self.data_segunda, self.data_domingo)
+        self.impedimentos_da_semana = impedimentodao.ImpedimentoDAO().get_impedimentos_from_date(self.data_segunda, self.data_domingo)
         
-       
-    def escalar_seg_a_dom(self):
+        self.cpus = cpudao.CpuDAO().get_cpus()
+        self.cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
+        self.cpus_nao_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
 
-        self.escalar_militares_tm()
-        
+        self.servicos_tm_escalados = list()
+    
+    @property
+    def impedimentos_da_semana(self):
+        return self.__impedimentos_da_semana
+    
+    @impedimentos_da_semana.setter
+    def impedimentos_da_semana(self, impedimentos_obj_list):
+        impedimentos_da_semana = dict()
+        for impedimento_obj in impedimentos_obj_list:
+            data = impedimento_obj.data_inicio
+            while data <= impedimento_obj.data_fim:
+                if data in self.dias_e_turnos_seg_a_dom_dict.keys():
+                    if data in impedimentos_da_semana.keys():
+                        impedimentos_da_semana[data].append(impedimento_obj.nome_de_guerra)
+                    else:
+                        impedimentos_da_semana[data] = [impedimento_obj.nome_de_guerra]
+                data += datetime.timedelta(days=1)
+        self.__impedimentos_da_semana = impedimentos_da_semana
+
+       
+    def escalar_seg_a_dom(self, escalar_tm=True):
+
+        if escalar_tm:
+            self.escalar_militares_tm()
         
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
@@ -64,7 +89,14 @@ class EscalarSemana:
         dois_meses_antes = max(self.dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
         gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(self.dias_e_turnos_seg_a_dom_dict))
 
-    def escalar_militares_tm(self):        
+    def escalar_militares_tm(self):
+        logs_escalar_militares_tm = dict()
+        if len(self.cpus_tm) == 0:
+            logs_escalar_militares_tm['Militares TM cadastrados'] = "Não há militar cadastrado com função TM."
+            return logs_escalar_militares_tm
+        else:
+            logs_escalar_militares_tm['Militares TM cadastrados'] = "Há {} militar(es) cadastrado(s) com função TM".format(len(self.cpus_tm))
+        
         servico_para_completar_seg_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 0 and _servico.turno == 2]
         servico_para_completar_ter_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 1 and _servico.turno == 2]
         servico_para_completar_dom_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 6 and _servico.turno == 2]
@@ -75,25 +107,82 @@ class EscalarSemana:
         if len(servico_para_completar_dom_2t) > 1:
             raise myexceptions.LogicException('A lista Escalar().servicos_para_completar_list deve conter os serviços para serem completados, de segunda a domingo, três turnos por dia. Não pode haver mais de um serviço com dia da semana == domingo e turno == 2. No momento, há {} serviços que atendem estes critérios.'.format(len(servico_para_completar_ter_2t)))
 
+        if len(servico_para_completar_seg_2t) == len(servico_para_completar_ter_2t) == len(servico_para_completar_dom_2t) == 0:
+            logs_escalar_militares_tm["Servicos 'TM' para completar"] = "Não há serviços 'TM' para completar."
+            return logs_escalar_militares_tm
+        else:
+            logs_escalar_militares_tm["Servicos 'TM' para completar"] = "Há serviço(s) 'TM' para completar: {} seg_2; {} ter_2; {} dom_2".format(
+                len(servico_para_completar_seg_2t),
+                len(servico_para_completar_ter_2t),
+                len(servico_para_completar_dom_2t)
+            )
+
+        data_segunda_anterior = self.data_segunda - datetime.timedelta(days=7)
+        data_terca_anterior = self.data_terca - datetime.timedelta(days=7)
+        data_domingo_anterior = self.data_domingo - datetime.timedelta(days=7)
+
+        servico_segunda_anterior_2t = servicodao.ServicoDAO().get_servico(data_segunda_anterior, 2)
+        servico_terca_anterior_2t = servicodao.ServicoDAO().get_servico(data_terca_anterior, 2)
+        servico_domingo_anterior_2t = servicodao.ServicoDAO().get_servico(data_domingo_anterior, 2)
+        
+        
+        # CPU da segunda anterior, 2t, era TM. CPU para terça atual será o mesmo, salvo impedimento.
+        condicao_1 = servico_segunda_anterior_2t.cpu.funcao == 'TM'
+
+        # CPU do domingo anterior, 2t, era TM, o mesmo da segunda.
+        condicao_2 = condicao_1 and servico_domingo_anterior_2t.cpu.nome_de_guerra == servico_segunda_anterior_2t.cpu.nome_de_guerra
+
+
+        # CPU da terça anterior, 2t, era TM. CPU para segunda e domingo atual será o mesmo, salvo impedimento.
+        condicao_3 = servico_terca_anterior_2t.cpu.funcao == 'TM'
+
+        # CPU da terça anterior, 2t, era TM e era diferente do CPU no domingo.
+        condicao_4 = condicao_3 and servico_terca_anterior_2t.cpu.nome_de_guerra != servico_domingo_anterior_2t.cpu.nome_de_guerra
+
+        condicao_1_str = "CPU da segunda anterior, 2t, era TM. CPU para terça atual será o mesmo, salvo impedimento."
+        condicao_2_str = "CPU do domingo anterior, 2t, era TM, o mesmo da segunda."
+        condicao_3_str = "CPU da terça anterior, 2t, era TM. CPU para segunda e domingo atual será o mesmo, salvo impedimento."
+        condicao_4_str = "CPU da terça anterior, 2t, era TM e era diferente do CPU no domingo."
+        
+        cpu_empenhos_seg_dom = None
+        cpu_empenho_ter = None
+        condicoes_dict = dict()
+
+        if condicao_1:            
+            cpu_empenho_ter = servico_segunda_anterior_2t.cpu
+            condicoes_dict['Cond_1 Verdadeiro: '] = condicao_1_str
+        else:
+            condicoes_dict['Cond_1 Falso: '] = condicao_1_str
+
+        
+        if condicao_2:
+            condicoes_dict['Cond_2 Verdadeiro: '] = condicao_2_str
+        else:
+            condicoes_dict['Cond_2 Falso: '] = condicao_2_str
+        
+        if condicao_3:            
+            cpu_empenhos_seg_dom = servico_terca_anterior_2t.cpu
+            condicoes_dict['Cond_3 Verdadeiro: '] = condicao_3_str
+        else:
+            condicoes_dict['Cond_3 Falso: '] = condicao_3_str
+
+        if condicao_4:            
+            condicoes_dict['Cond_2 Verdadeiro: '] = condicao_4_str
+        else:
+            condicoes_dict['Cond_2 Falso: '] = condicao_4_str
+        
+        logs_escalar_militares_tm['Situação rodízio'] = condicoes_dict
+
+        
         if len(servico_para_completar_seg_2t) == 1:            
             data_terca_anterior = self.data_terca - datetime.timedelta(days=7)
             servico_terca_anterior = servicodao.ServicoDAO().get_servico(data_terca_anterior, 2)
+            
+
         
-        for f in self.feriados:
-            print(f)
+        #for data, nome_de_guerra in self.impedimentos_da_semana.items():
+        #    print(config.dias_da_semana[data.weekday()], nome_de_guerra)
+        
         
 
-                
-        
-
-        seg_dom_atual = list(filter(lambda data: data.weekday() in (0, 6), self.dias_e_turnos_seg_a_dom_dict))
-        ter_atual = list(filter(lambda data: data.weekday() == 1, self.dias_e_turnos_seg_a_dom_dict))                
-        
-        seg_dom_semana_anterior = list(map(lambda data: data - datetime.timedelta(days=7), seg_dom_atual))
-        ter_semana_anterior = list(map(lambda data: data - datetime.timedelta(days=7), ter_atual))
-        
-                
-        servicos_tm_A_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), seg_dom_semana_anterior))
-        servicos_tm_B_semana_anterior = list(map(lambda data: servicodao.ServicoDAO().get_servico(data, 2), ter_semana_anterior))
-        
         

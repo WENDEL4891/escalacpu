@@ -146,9 +146,18 @@ class Cpu:
 
     def __str__(self):
         return\
-            'P/G: ' +  self.pg +\
-            ' | Nome completo: ' + self.nome_completo +\
-            ' | Nome de guerra: ' + self.nome_de_guerra +\
-            ' | Função: ' + self.funcao +\
-            ' | Curso: ' + self.curso +\
-            ' | Ano base: ' + str(self.ano_base)
+            "{}: {:8} |".format('P/G', self.pg) +\
+            "{}: {:16} |".format('Nome de Guerra', self.nome_de_guerra) +\
+            "{}: {:32} |".format('Nome Completo', self.nome_completo) +\
+            "{}: {:4} |".format('Função', self.funcao) +\
+            "{}: {:4} |".format('Curso', self.curso) +\
+            "{}: {:4} |".format('Ano base', self.ano_base)
+            
+            
+            
+            
+            
+            
+            
+            
+            

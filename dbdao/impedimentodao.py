@@ -2,7 +2,7 @@ from entities import impedimento
 from db import connection
 from dbdao import cpudao
 import sqlite3
-from datetime import datetime
+import datetime
 from services import functions
 import myexceptions
 import copy
@@ -17,8 +17,8 @@ class ImpedimentoDAO:
             conn = connection_instance.get_connection()
             cursor = conn.cursor()
             
-            dta_in_format = datetime.strftime(impedimento_instance.data_inicio, '%Y-%m-%d')
-            dta_fim_format = datetime.strftime(impedimento_instance.data_fim, '%Y-%m-%d')
+            dta_in_format = datetime.datetime.strftime(impedimento_instance.data_inicio, '%Y-%m-%d')
+            dta_fim_format = datetime.datetime.strftime(impedimento_instance.data_fim, '%Y-%m-%d')
 
             primCond = "nome_de_guerra = '" + impedimento_instance.nome_de_guerra + "'"
             segCond = "'" + dta_in_format + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"            
@@ -73,7 +73,7 @@ class ImpedimentoDAO:
             cursor = conn.cursor()
            
             nome_de_guerra_format = impedimento_para_ser_removido.nome_de_guerra
-            data_inicio_format = datetime.strftime(impedimento_para_ser_removido.data_inicio, '%Y-%m-%d')
+            data_inicio_format = datetime.datetime.strftime(impedimento_para_ser_removido.data_inicio, '%Y-%m-%d')
 
             rmQuery = "DELETE FROM impedimentos WHERE nome_de_guerra = '" + nome_de_guerra_format + "' AND DATE(data_inicio) = '" + data_inicio_format + "'"
 
@@ -120,30 +120,30 @@ class ImpedimentoDAO:
         
         if 'data_inicio' in parametros_informados and 'data_fim' in parametros_informados:
             try:
-                di = datetime.strptime(dados_para_atualizar_params['data_inicio'], '%d/%m/%Y')
-                df = datetime.strptime(dados_para_atualizar_params['data_fim'], '%d/%m/%Y')
+                di = datetime.datetime.strptime(dados_para_atualizar_params['data_inicio'], '%d/%m/%Y')
+                df = datetime.datetime.strptime(dados_para_atualizar_params['data_fim'], '%d/%m/%Y')
             except ValueError:
                 raise ValueError('As datas devem ser informadas no formato dd/mm/AAAA.')
             if di > df:
                 raise ValueError('A data de início não pode ser posterior a data fim.')
-            dados_para_atualizar_params['data_inicio'] = datetime.strftime(di, '%Y-%m-%d')
-            dados_para_atualizar_params['data_fim'] = datetime.strftime(df, '%Y-%m-%d')
+            dados_para_atualizar_params['data_inicio'] = datetime.datetime.strftime(di, '%Y-%m-%d')
+            dados_para_atualizar_params['data_fim'] = datetime.datetime.strftime(df, '%Y-%m-%d')
         if 'data_inicio' in parametros_informados and 'data_fim' not in parametros_informados:        
             try:
-                di = datetime.strptime(dados_para_atualizar_params['data_inicio'], '%d/%m/%Y')                
+                di = datetime.datetime.strptime(dados_para_atualizar_params['data_inicio'], '%d/%m/%Y')                
             except ValueError:
                 raise ValueError('As datas devem ser informadas no formato dd/mm/AAAA.')
             if di.date() > impedimento_para_atualizar.data_fim:
                 raise ValueError('A data de início não pode ser posterior a data fim.')
-            dados_para_atualizar_params['data_inicio'] = datetime.strftime(di, '%Y-%m-%d')
+            dados_para_atualizar_params['data_inicio'] = datetime.datetime.strftime(di, '%Y-%m-%d')
         if 'data_fim' in parametros_informados and 'data_inicio' not in parametros_informados:
             try:                
-                df = datetime.strptime(dados_para_atualizar_params['data_fim'], '%d/%m/%Y')
+                df = datetime.datetime.strptime(dados_para_atualizar_params['data_fim'], '%d/%m/%Y')
             except ValueError:
                 raise ValueError('As datas devem ser informadas no formato dd/mm/AAAA.')            
             if df.date() < impedimento_para_atualizar.data_inicio:
                 raise ValueError('A data fim deve ser igual ou posterior a data de início.')
-            dados_para_atualizar_params['data_fim'] = datetime.strftime(df, '%Y-%m-%d')
+            dados_para_atualizar_params['data_fim'] = datetime.datetime.strftime(df, '%Y-%m-%d')
             
         
         parametros_invalidos = list()
@@ -197,7 +197,7 @@ class ImpedimentoDAO:
         nome_de_guerra_format = nome_de_guerra.upper()
 
         data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
-        data_inicio_format = datetime.strftime(data_inicio_datetime, '%Y-%m-%d')               
+        data_inicio_format = datetime.datetime.strftime(data_inicio_datetime, '%Y-%m-%d')               
         
         select_query = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM \
             impedimentos WHERE nome_de_guerra  = '" + nome_de_guerra_format + "' AND  \
@@ -226,28 +226,38 @@ class ImpedimentoDAO:
             if 'conn' in locals():
                 conn.close()
 
-    def get_impedimentos_from_date(self, data_inicio='', data_fim=''):
-        if not isinstance(data_inicio, str) and isinstance(data_fim, str):
-            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser strings.')
+    def get_impedimentos_from_date(self, data_inicio=None, data_fim=None):       
+        if not (
+            ( isinstance(data_inicio, str) and isinstance(data_fim, str) )
+                or
+            ( type(data_inicio) == type(data_fim) == datetime.date )
+
+        ):        
+            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser ambos strings ou ambos datetime.date. Foram passados:\n\t{:14}: {};\n\t{:14}: {}.'.format('data_inicio', str(type(data_inicio)), 'data_fim', str(type(data_fim))))
         
-        if len(data_inicio) != len(data_fim):
-            raise ValueError('Informe uma data de início e uma de fim do período. Ou não informe nenhuma data.')
-        
-        if not data_inicio == '':            
-            data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
-            data_fim_datetime = functions.date_str_to_datetime(data_fim)
+        datas_estao_preenchidas_bool = False
+        if not data_inicio == None:            
+            datas_estao_preenchidas_bool = True
+            if isinstance(data_inicio, str):
+                data_inicio_datetime = functions.date_str_to_datetime(data_inicio)
+                data_fim_datetime = functions.date_str_to_datetime(data_fim)
+            elif isinstance(data_inicio, datetime.date):
+                data_inicio_datetime = data_inicio
+                data_fim_datetime = data_fim
+        else:
+            condicoes = ''
+            
+        if datas_estao_preenchidas_bool:
             if data_inicio_datetime > data_fim_datetime:
                 raise ValueError('A data fim deve ser superior a data de início.')
                                     
-            dta_in_format = datetime.strftime(data_inicio_datetime, '%Y-%m-%d')
-            dta_fim_format = datetime.strftime(data_fim_datetime, '%Y-%m-%d')
+            dta_in_format = datetime.datetime.strftime(data_inicio_datetime, '%Y-%m-%d')
+            dta_fim_format = datetime.datetime.strftime(data_fim_datetime, '%Y-%m-%d')
         
             primCond = "'" + dta_in_format + "' BETWEEN DATE(data_inicio) AND DATE(data_fim)"        
             segCond = "DATE(data_inicio) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
             terCond = "DATE(data_fim) BETWEEN '" + dta_in_format + "' AND '" + dta_fim_format + "'"
             condicoes = " WHERE (" + primCond + ") OR (" + segCond + ") OR (" + terCond + ")"
-        else:
-            condicoes = ''
 
         select_query = "SELECT nome_de_guerra, tipo, data_inicio, data_fim, observacao FROM impedimentos" + condicoes                  
         

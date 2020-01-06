@@ -165,10 +165,10 @@ class FeriadoDAO:
         if not (
             ( isinstance(data_inicio, str) and isinstance(data_fim, str) )
                 or
-            ( isinstance(data_inicio, datetime.date) and isinstance(data_fim, datetime.date) )
+            ( type(data_inicio) == type(data_fim) == datetime.date )
 
         ):        
-            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser ambos strings ou ambos datetime.date.')
+            raise ValueError('Os parâmetros são opcionais. Mas se informados, devem ser ambos strings ou ambos datetime.date. Foram passados:\n\t{:14}: {};\n\t{:14}: {}.'.format('data_inicio', str(type(data_inicio)), 'data_fim', str(type(data_fim))))
         
         if isinstance(data_inicio, str):
             if len(data_inicio) != len(data_fim):
