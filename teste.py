@@ -1,6 +1,7 @@
 from services import escalarsemana
 from entities import filapormodalidade, servico
 from dbdao import cpudao, impedimentodao, servicodao, feriadodao, ordenacaopormilitardao
+import datetime
 
 
 
@@ -117,15 +118,21 @@ print('sem_3', queue.getNext("sem_3")) """
 #_escalar = escalar.Escalar()
 escalarsemana.EscalarSemana().escalar_seg_a_dom()
 
+#data = datetime.datetime.strptime('01/02/2020', '%d/%m/%Y').date()
+#while data < datetime.datetime.strptime('03/02/2020', '%d/%m/%Y').date():
+#    for i in range(3):
+#        servicodao.ServicoDAO().servico_add(data, i + 1, 'Madureira')
+#    data += datetime.timedelta(days=1)
+
 
 
 #_servico = servico.Servico('10/10/2020', 2, 'MADUREIRA', 'ASP GOULARD')
 
 
 #impedimento_dao = impedimentodao.ImpedimentoDAO()
-#impedimento_dao.impedimento_add('madureira', 'ferias', '04/02/2020', '20/08/2020', 'comentário madureira')
+#impedimento_dao.impedimento_add('madureira', 'ferias', '27/02/2020', '29/02/2020', 'comentário madureira')
 #impedimento_dao.impedimento_add('cunha', 'ferias', '04/02/2020', '04/08/2020', 'comentário cunha')
-#impedimento_dao.impedimento_add('jefferson', 'ferias', '11/07/2020', '13/08/2020', 'comentário jefferson')
+#impedimento_dao.impedimento_add('jefferson', 'ferias', '28/02/2020', '05/03/2020', 'comentário jefferson')
 #impedimento_dao.impedimento_add('fernanda', 'ferias', '11/07/2020', '13/08/2020', 'comentário fernanda')
 #impedimento_dao.impedimento_add('renan', 'ferias', '04/07/2020', '20/08/2020', 'comentário renan')
 #impedimento_dao.impedimento_add('helder', 'ferias', '21/07/2020', '25/08/2020', 'comentário madureira')

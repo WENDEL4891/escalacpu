@@ -6,6 +6,7 @@ import datetime
 import config
 import sys
 import myexceptions
+import pprint
 
 class EscalarSemana:
 
@@ -55,7 +56,12 @@ class EscalarSemana:
     def escalar_seg_a_dom(self, escalar_tm=True):
 
         if escalar_tm:
-            self.escalar_militares_tm()
+            logs_escalar_militares_tm = self.escalar_militares_tm()
+        
+        pp = pprint.PrettyPrinter(indent=4)
+
+        for mens in logs_escalar_militares_tm.items():
+            pp.pprint(mens)
         
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
@@ -100,6 +106,7 @@ class EscalarSemana:
         servico_para_completar_seg_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 0 and _servico.turno == 2]
         servico_para_completar_ter_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 1 and _servico.turno == 2]
         servico_para_completar_dom_2t = [_servico for _servico in self.servicos_para_completar_list if _servico.data.weekday() == 6 and _servico.turno == 2]
+        
         if len(servico_para_completar_seg_2t) > 1:
             raise myexceptions.LogicException('A lista Escalar().servicos_para_completar_list deve conter os serviços para serem completados, de segunda a domingo, três turnos por dia. Não pode haver mais de um serviço com dia da semana == segunda-feira e turno == 2. No momento, há {} serviços que atendem estes critérios.'.format(len(servico_para_completar_seg_2t)))
         if len(servico_para_completar_ter_2t) > 1:
@@ -146,38 +153,52 @@ class EscalarSemana:
         
         cpu_empenhos_seg_dom = None
         cpu_empenho_ter = None
-        condicoes_dict = dict()
+        
+        logs_escalar_militares_tm['Condições'] = dict()
+        logs_escalar_militares_tm['Condições']['Cumpridas'] = list()
+        logs_escalar_militares_tm['Condições']['Não cumpridas'] = list()
 
         if condicao_1:            
             cpu_empenho_ter = servico_segunda_anterior_2t.cpu
-            condicoes_dict['Cond_1 Verdadeiro: '] = condicao_1_str
+            logs_escalar_militares_tm['Condições']['Cumpridas'].append(condicao_1_str)
         else:
-            condicoes_dict['Cond_1 Falso: '] = condicao_1_str
+            logs_escalar_militares_tm['Condições']['Não cumpridas'].append(condicao_1_str)
 
         
         if condicao_2:
-            condicoes_dict['Cond_2 Verdadeiro: '] = condicao_2_str
+            logs_escalar_militares_tm['Condições']['Cumpridas'].append(condicao_2_str)
         else:
-            condicoes_dict['Cond_2 Falso: '] = condicao_2_str
+            logs_escalar_militares_tm['Condições']['Não cumpridas'].append(condicao_2_str)
         
         if condicao_3:            
             cpu_empenhos_seg_dom = servico_terca_anterior_2t.cpu
-            condicoes_dict['Cond_3 Verdadeiro: '] = condicao_3_str
+            logs_escalar_militares_tm['Condições']['Cumpridas'].append(condicao_3_str)
         else:
-            condicoes_dict['Cond_3 Falso: '] = condicao_3_str
+            logs_escalar_militares_tm['Condições']['Não cumpridas'].append(condicao_3_str)
 
         if condicao_4:            
-            condicoes_dict['Cond_2 Verdadeiro: '] = condicao_4_str
+            logs_escalar_militares_tm['Condições']['Cumpridas'].append(condicao_4_str)
         else:
-            condicoes_dict['Cond_2 Falso: '] = condicao_4_str
+            logs_escalar_militares_tm['Condições']['Não cumpridas'].append(condicao_4_str)
         
-        logs_escalar_militares_tm['Situação rodízio'] = condicoes_dict
-
         
-        if len(servico_para_completar_seg_2t) == 1:            
-            data_terca_anterior = self.data_terca - datetime.timedelta(days=7)
-            servico_terca_anterior = servicodao.ServicoDAO().get_servico(data_terca_anterior, 2)
-            
+        if len(servico_para_completar_seg_2t) == 1:
+            if cpu_empenhos_seg_dom != None:
+                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos_da_semana[servico_para_completar_seg_2t[0].data]:
+                    servico_para_completar_seg_2t[0].cpu = cpu_empenhos_seg_dom                    
+                    servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_seg_2t[0])
+                    logs_escalar_militares_tm['seg_2t sucesso'] = True
+                else:
+                    logs_escalar_militares_tm['seg_2t'] = 'O CPU que seria escalado estava com impedimento na data.'                    
+                    logs_escalar_militares_tm['seg_2t sucesso'] = False
+            else:
+                logs_escalar_militares_tm['seg_2t'] = 'Não foi possível identificar o próximo CPU no rodízio'
+                logs_escalar_militares_tm['seg_2t sucesso'] = False
+        else:
+            logs_escalar_militares_tm['seg_2t'] = 'Serviço seg_2t já estava preenchido.'
+            logs_escalar_militares_tm['seg_2t sucesso'] = False
+        
+        return logs_escalar_militares_tm
 
         
         #for data, nome_de_guerra in self.impedimentos_da_semana.items():

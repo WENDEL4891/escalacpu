@@ -11,8 +11,11 @@ class ServicoDAO:
     def __init__(self):
         self.primeira_data_de_servico = functions.date_str_to_datetime(config.primeira_data)
 
-    def servico_add(self, data, turno, _cpu, nome_estagio=None):        
-        serv_inst = servico.Servico(data, turno, _cpu, nome_estagio)
+    def servico_add(self, data=None, turno=None, _cpu=None, nome_estagio=None, _servico=None):        
+        if _servico == None:
+            serv_inst = servico.Servico(data, turno, _cpu, nome_estagio)
+        else:
+            serv_inst = _servico
         if serv_inst.cpu.nome_de_guerra == 'DEFAULT':
             raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
 
@@ -29,8 +32,10 @@ class ServicoDAO:
                 print('Serviço inserido no banco de dados com sucesso: ')
                 print(serv_inst)
                 print('\'' * 40)
+                return 0
             else:
                 print('O serviço não foi inserido no banco de dados. Causa não identificada.')
+                return 1
         except:
             print('Erro ao tentar inserir o serviço no banco de dados')
             print('Tipo do erro: ', sys.exc_info()[0], sep=' > ')
