@@ -133,10 +133,18 @@ class GerenciadorDeFilas:
         fila_semana = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_semana:                        
             fila_semana.membro_add_ultimo_para_primeiro(_servico)
-        self.__fila_semana = fila_semana        
+        
+        if len(fila_semana.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
+                    fila_fds.membro_add_primeiro_para_ultimo(_cpu)        
+        self.__fila_fds = fila_fds
+        
+        self.__fila_semana = fila_semana
         
     @fila_sem_12.setter
-    def fila_sem_12(self, modalidade):        
+    def fila_sem_12(self, modalidade):
         servicos_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_em_ordem_decrescente_sem_tm))        
         fila_sem_12 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sem_12:                        
