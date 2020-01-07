@@ -41,14 +41,13 @@ class EscalarSemana:
     @impedimentos_da_semana.setter
     def impedimentos_da_semana(self, impedimentos_obj_list):
         impedimentos_da_semana = dict()
+        for data in self.dias_e_turnos_seg_a_dom_dict.keys():
+            impedimentos_da_semana[data] = list()
         for impedimento_obj in impedimentos_obj_list:
             data = impedimento_obj.data_inicio
             while data <= impedimento_obj.data_fim:
-                if data in self.dias_e_turnos_seg_a_dom_dict.keys():
-                    if data in impedimentos_da_semana.keys():
-                        impedimentos_da_semana[data].append(impedimento_obj.nome_de_guerra)
-                    else:
-                        impedimentos_da_semana[data] = [impedimento_obj.nome_de_guerra]
+                if data in impedimentos_da_semana.keys():
+                    impedimentos_da_semana[data].append(impedimento_obj.nome_de_guerra)                    
                 data += datetime.timedelta(days=1)
         self.__impedimentos_da_semana = impedimentos_da_semana
 
@@ -118,7 +117,7 @@ class EscalarSemana:
             logs_escalar_militares_tm["Servicos 'TM' para completar"] = "Não há serviços 'TM' para completar."
             return logs_escalar_militares_tm
         else:
-            logs_escalar_militares_tm["Servicos 'TM' para completar"] = "Há serviço(s) 'TM' para completar: {} seg_2; {} ter_2; {} dom_2".format(
+            logs_escalar_militares_tm["Servicos 'TM' para completar"] = "Há serviço(s) 'TM' para completar: (seg_2 -> {}); (ter_2 -> {}); (dom_2 -> {}).".format(
                 len(servico_para_completar_seg_2t),
                 len(servico_para_completar_ter_2t),
                 len(servico_para_completar_dom_2t)
@@ -182,21 +181,38 @@ class EscalarSemana:
             logs_escalar_militares_tm['Condições']['Não cumpridas'].append(condicao_4_str)
         
         
-        if len(servico_para_completar_seg_2t) == 1:
-            if cpu_empenhos_seg_dom != None:
+        if cpu_empenhos_seg_dom != None:                
+            if len(servico_para_completar_seg_2t) == 1:
                 if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos_da_semana[servico_para_completar_seg_2t[0].data]:
                     servico_para_completar_seg_2t[0].cpu = cpu_empenhos_seg_dom                    
                     servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_seg_2t[0])
                     logs_escalar_militares_tm['seg_2t sucesso'] = True
+                    logs_escalar_militares_tm['seg_2t'] = cpu_empenhos_seg_dom.nome_de_guerra
                 else:
                     logs_escalar_militares_tm['seg_2t'] = 'O CPU que seria escalado estava com impedimento na data.'                    
                     logs_escalar_militares_tm['seg_2t sucesso'] = False
             else:
-                logs_escalar_militares_tm['seg_2t'] = 'Não foi possível identificar o próximo CPU no rodízio'
+                logs_escalar_militares_tm['seg_2t'] = 'Serviço seg_2t já estava preenchido.'
                 logs_escalar_militares_tm['seg_2t sucesso'] = False
+            
+            if len(servico_para_completar_dom_2t) == 1:
+                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos_da_semana[servico_para_completar_dom_2t[0].data]:
+                    servico_para_completar_dom_2t[0].cpu = cpu_empenhos_seg_dom                    
+                    servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_dom_2t[0])
+                    logs_escalar_militares_tm['dom_2t sucesso'] = True
+                    logs_escalar_militares_tm['dom_2t'] = cpu_empenhos_seg_dom.nome_de_guerra
+                else:
+                    logs_escalar_militares_tm['dom_2t'] = 'O CPU que seria escalado estava com impedimento na data.'                    
+                    logs_escalar_militares_tm['dom_2t sucesso'] = False
+            else:
+                logs_escalar_militares_tm['dom_2t'] = 'Serviço dom_2t já estava preenchido.'
+                logs_escalar_militares_tm['dom_2t sucesso'] = False
+
         else:
-            logs_escalar_militares_tm['seg_2t'] = 'Serviço seg_2t já estava preenchido.'
+            logs_escalar_militares_tm['seg_dom_2t'] = 'Não foi possível identificar o próximo CPU no rodízio'
             logs_escalar_militares_tm['seg_2t sucesso'] = False
+            logs_escalar_militares_tm['dom_2t sucesso'] = False
+                
         
         return logs_escalar_militares_tm
 

@@ -35,8 +35,10 @@ class Servico:
     
     @data.setter
     def data(self, data):
-        if isinstance(data, datetime.date):
-            self.__data = data
+        if isinstance(data, datetime.datetime):
+            self.__data = data.date()
+        elif isinstance(data, datetime.date):
+            self.__data = data            
         else:
             self.__data = functions.date_str_to_datetime(data)
     
