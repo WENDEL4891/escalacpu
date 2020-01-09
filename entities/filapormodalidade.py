@@ -60,13 +60,13 @@ class FilaPorModalidade:
         
         if not self.modalidade == 'fds':
             if not _servico.cpu.nome_de_guerra in list(map(lambda _cpu: _cpu.nome_de_guerra, self.fila)):
-                self.fila.append(_servico.cpu)
+                self.fila.insert(0, _servico.cpu)
         else:
             cpu_not_in_fila = True
             for _cpu in self.fila:
                 if _cpu.nome_de_guerra == _servico.cpu.nome_de_guerra:
                     cpu_not_in_fila = False
-                    _cpu.servicos_fds.append(_servico)
+                    _cpu.servicos_fds.insert(0, _servico)
                     break
             if cpu_not_in_fila:
                 servico_para_incluir = _servico.cpu

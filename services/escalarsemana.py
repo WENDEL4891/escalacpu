@@ -58,6 +58,8 @@ class EscalarSemana:
         if escalar_tm:
             logs_escalar_militares_tm = self.escalar_militares_tm()
         
+        self.escalar_fds()
+    
         #pp = pprint.PrettyPrinter(indent=4)
 
         #for mens in logs_escalar_militares_tm.items():
@@ -67,9 +69,8 @@ class EscalarSemana:
         #gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(self.dias_e_turnos_seg_a_dom_dict))
         #
         #print(gerenciador_de_filas.fila_dom_3)
-        print(self.gerenciador_de_filas.fila_dom_3)
+        #print(self.gerenciador_de_filas.fila_dom_3)
         
-        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_para_completar_list))
         servicos_para_completar_sem_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_3', self.servicos_para_completar_list))
@@ -222,9 +223,15 @@ class EscalarSemana:
                 logs_escalar_militares_tm['ter_2t sucesso'] = False
         else:
             logs_escalar_militares_tm['ter_2t'] = 'Não foi possível identificar o próximo CPU no rodízio'
-            logs_escalar_militares_tm['ter_2t sucesso'] = False            
-                
+            logs_escalar_militares_tm['ter_2t sucesso'] = False                
         
         return logs_escalar_militares_tm
+    
+    def escalar_fds(self):
+        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
+        for _servico in self.servicos_para_completar_list:
+            print(_servico)
+
+
 
         

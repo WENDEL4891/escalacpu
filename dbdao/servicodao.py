@@ -298,7 +298,7 @@ class ServicoDAO:
         def todas_as_datas_da_semana_generator():
             for num in range(7):
                 yield seg_no_periodo + datetime.timedelta(days=num)
-        todas_as_datas_da_semana_list = list(todas_as_datas_da_semana_generator())
+        todas_as_datas_da_semana_list = list(todas_as_datas_da_semana_generator())        
         
         #for num in range(7):            
         #    todas_as_datas_do_periodo_in_list.append(seg_no_periodo + datetime.timedelta(days=num))
@@ -338,11 +338,11 @@ class ServicoDAO:
             data = functions.date_str_to_datetime(result[0])
             soma_turnos = result[1]
             conta_servicos = result[2]
-            turnos_para_escalar_por_data_dict[data] = self.get_turnos_para_escalar(soma_turnos, conta_servicos)
+            turnos_para_escalar_por_data_dict[data] = self.get_turnos_para_escalar(soma_turnos, conta_servicos)        
         
-        for data in todas_as_datas_da_semana_list:
+        for data in todas_as_datas_da_semana_list:            
             if data not in turnos_para_escalar_por_data_dict:
-                turnos_para_escalar_por_data_dict[data] = [1, 2, 3]        
+                turnos_para_escalar_por_data_dict[data] = [1, 2, 3]
         return turnos_para_escalar_por_data_dict
 
     def get_turnos_para_escalar(self, soma_turnos, cont_datas):        
