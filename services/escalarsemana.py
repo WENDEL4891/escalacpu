@@ -229,8 +229,15 @@ class EscalarSemana:
     
     def escalar_fds(self):
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
-        for _servico in self.servicos_para_completar_list:
-            print(_servico)
+        for _servico in self.servicos_para_completar_list:            
+            self.escalar_por_modalidade(_servico.get_modalidade())
+        
+        print(self.gerenciador_de_filas.filas['fds'])
+    
+    def escalar_por_modalidade(self, modalidade):
+        servicos = list(filter(lambda _servico: _servico.get_modalidade() == modalidade, self.servicos_para_completar_list))
+        for _servico in servicos:
+            pass
 
 
 

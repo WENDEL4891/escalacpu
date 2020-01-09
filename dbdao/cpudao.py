@@ -19,6 +19,7 @@ class CpuDAO:
     @property
     def cpus_sem_tm(self):
         self.__cpus_sem_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
+        self.__cpus_sem_tm.sort(key=lambda _cpu: _cpu.ano_base, reverse=True)
         return self.__cpus_sem_tm
         
 

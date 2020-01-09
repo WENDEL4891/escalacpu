@@ -12,7 +12,7 @@ class FilaPorModalidade:
     def __init__(self, modalidade):
         self.modalidade = modalidade      
         self.fila = list()  
-        self.ultimo_servico_da_fila = None
+        
         
     
     @property
@@ -66,12 +66,12 @@ class FilaPorModalidade:
             for _cpu in self.fila:
                 if _cpu.nome_de_guerra == _servico.cpu.nome_de_guerra:
                     cpu_not_in_fila = False
-                    _cpu.servicos_fds.insert(0, _servico)
+                    _cpu.servicos_fds.append(_servico)
                     break
             if cpu_not_in_fila:
                 servico_para_incluir = _servico.cpu
                 servico_para_incluir.servicos_fds.append(_servico)
-                self.fila.append(servico_para_incluir)
+                self.fila.insert(0, servico_para_incluir)
         
         
     def fds_add(self, _servico):
