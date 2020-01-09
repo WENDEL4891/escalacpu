@@ -6,8 +6,8 @@ import datetime
 class GerenciadorDeFilas:
     cpu_dao = cpudao.CpuDAO()
 
-    def __init__(self, data_inicio, data_fim):        
-        self.servicos_em_ordem_decrescente = {'data_inicio': data_inicio, 'data_fim': data_fim}
+    def __init__(self, data_fim):        
+        self.servicos_em_ordem_decrescente = data_fim
         self.servicos_em_ordem_decrescente_sem_tm = self.servicos_em_ordem_decrescente
 
         self.fila_fds = 'fds'
@@ -78,8 +78,9 @@ class GerenciadorDeFilas:
 
 
     @servicos_em_ordem_decrescente.setter
-    def servicos_em_ordem_decrescente(self, datas_dict):        
-        servicos_em_ordem_decrescente = servicodao.ServicoDAO().get_servicos(datas_dict['data_inicio'], datas_dict['data_fim'])
+    def servicos_em_ordem_decrescente(self, data_fim):        
+        data_inicio = data_fim - datetime.timedelta(days=190)
+        servicos_em_ordem_decrescente = servicodao.ServicoDAO().get_servicos(data_inicio, data_fim)
         servicos_em_ordem_decrescente.sort(reverse=True)
         self.__servicos_em_ordem_decrescente = servicos_em_ordem_decrescente
     
@@ -137,10 +138,8 @@ class GerenciadorDeFilas:
         if len(fila_semana.fila) < len(self.cpu_dao.cpus_sem_tm):
             cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
             for _cpu in cpus_sem_tm_ordem_inversa:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds.fila)):
-                    fila_fds.membro_add_primeiro_para_ultimo(_cpu)        
-        self.__fila_fds = fila_fds
-        
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_semana.fila)):
+                    fila_semana.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_semana = fila_semana
         
     @fila_sem_12.setter
@@ -149,6 +148,12 @@ class GerenciadorDeFilas:
         fila_sem_12 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sem_12:                        
             fila_sem_12.membro_add_ultimo_para_primeiro(_servico)
+
+        if len(fila_sem_12.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_sem_12.fila)):
+                    fila_sem_12.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_sem_12 = fila_sem_12
         
     @fila_sem_3.setter
@@ -157,6 +162,12 @@ class GerenciadorDeFilas:
         fila_sem_3 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sem_3:                        
             fila_sem_3.membro_add_ultimo_para_primeiro(_servico)
+        
+        if len(fila_sem_3.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_sem_3.fila)):
+                    fila_sem_3.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_sem_3 = fila_sem_3        
          
         
@@ -166,6 +177,12 @@ class GerenciadorDeFilas:
         fila_qua_2 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_qua_2:                        
             fila_qua_2.membro_add_ultimo_para_primeiro(_servico)
+
+        if len(fila_qua_2.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_qua_2.fila)):
+                    fila_qua_2.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_qua_2 = fila_qua_2        
           
         
@@ -175,6 +192,12 @@ class GerenciadorDeFilas:
         fila_sex_2 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sex_2:                        
             fila_sex_2.membro_add_ultimo_para_primeiro(_servico)
+        
+        if len(fila_sex_2.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_sex_2.fila)):
+                    fila_sex_2.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_sex_2 = fila_sex_2        
         
     @fila_qui_3.setter
@@ -183,6 +206,12 @@ class GerenciadorDeFilas:
         fila_qui_3 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_qui_3:                        
             fila_qui_3.membro_add_ultimo_para_primeiro(_servico)
+
+        if len(fila_qui_3.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_qui_3.fila)):
+                    fila_qui_3.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_qui_3 = fila_qui_3        
         
     @fila_sex_3.setter
@@ -191,6 +220,12 @@ class GerenciadorDeFilas:
         fila_sex_3 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sex_3:                        
             fila_sex_3.membro_add_ultimo_para_primeiro(_servico)
+
+        if len(fila_sex_3.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_sex_3.fila)):
+                    fila_sex_3.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_sex_3 = fila_sex_3        
         
     @fila_fds_12.setter
@@ -199,6 +234,12 @@ class GerenciadorDeFilas:
         fila_fds_12 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_fds_12:                        
             fila_fds_12.membro_add_ultimo_para_primeiro(_servico)
+        
+        if len(fila_fds_12.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_fds_12.fila)):
+                    fila_fds_12.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_fds_12 = fila_fds_12        
         
     @fila_sab_3.setter
@@ -207,6 +248,12 @@ class GerenciadorDeFilas:
         fila_sab_3 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_sab_3:                        
             fila_sab_3.membro_add_ultimo_para_primeiro(_servico)
+        
+        if len(fila_sab_3.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_sab_3.fila)):
+                    fila_sab_3.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_sab_3 = fila_sab_3        
         
     @fila_dom_3.setter
@@ -215,4 +262,10 @@ class GerenciadorDeFilas:
         fila_dom_3 = filapormodalidade.FilaPorModalidade(modalidade)
         for _servico in servicos_dom_3:                        
             fila_dom_3.membro_add_ultimo_para_primeiro(_servico)
+        
+        if len(fila_dom_3.fila) < len(self.cpu_dao.cpus_sem_tm):
+            cpus_sem_tm_ordem_inversa = sorted(self.cpu_dao.cpus_sem_tm, key = lambda _cpu: _cpu.ano_base)
+            for _cpu in cpus_sem_tm_ordem_inversa:
+                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, fila_dom_3.fila)):
+                    fila_dom_3.membro_add_primeiro_para_ultimo(_cpu)
         self.__fila_dom_3 = fila_dom_3

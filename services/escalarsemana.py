@@ -31,7 +31,7 @@ class EscalarSemana:
         self.cpus = cpudao.CpuDAO().get_cpus()
         self.cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
         self.cpus_nao_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
-        #self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(self.domingo))
+        self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(self.data_domingo)
 
         self.servicos_tm_escalados = list()
     
@@ -58,15 +58,16 @@ class EscalarSemana:
         if escalar_tm:
             logs_escalar_militares_tm = self.escalar_militares_tm()
         
-        pp = pprint.PrettyPrinter(indent=4)
+        #pp = pprint.PrettyPrinter(indent=4)
 
-        for mens in logs_escalar_militares_tm.items():
-            pp.pprint(mens)
+        #for mens in logs_escalar_militares_tm.items():
+        #    pp.pprint(mens)
         
         #dois_meses_antes = max(self.dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
         #gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(self.dias_e_turnos_seg_a_dom_dict))
         #
         #print(gerenciador_de_filas.fila_dom_3)
+        print(self.gerenciador_de_filas.fila_dom_3)
         
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
