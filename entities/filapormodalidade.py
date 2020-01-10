@@ -118,10 +118,10 @@ class FilaPorModalidade:
             raise TypeError('O parâmetro pula é opcional. Quando for preenchido, deve receber um argumento do tipo int. Foi passado {}'.format(str(type(pula))))
         if pula >= qtd_de_membros:
             raise myexceptions.LogicException('Não é possível pular {} membros, pois o tamanho da fila é de {} membros.'.format(pula, qtd_de_membros))
-        next_membro = self.fila[1 + pula]
-        for ordem, nome in self.fila.items():
-            if ordem > (1 + pula):
-                self.fila[ordem -1] = nome
+        next_membro = self.fila[pula]
+        for i in range(len(self.fila)):
+            if i > pula:
+                self.fila[i - 1] = nome
         self.fila[qtd_de_membros] = next_membro
         return next_membro
     

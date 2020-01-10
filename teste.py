@@ -135,7 +135,7 @@ escalarsemana.EscalarSemana().escalar_seg_a_dom()
 #impedimento_dao.impedimento_add('jefferson', 'ferias', '28/02/2020', '05/03/2020', 'comentário jefferson')
 #impedimento_dao.impedimento_add('fernanda', 'ferias', '11/07/2020', '13/08/2020', 'comentário fernanda')
 #impedimento_dao.impedimento_add('renan', 'ferias', '04/07/2020', '20/08/2020', 'comentário renan')
-#impedimento_dao.impedimento_add('helder', 'ferias', '21/07/2020', '25/08/2020', 'comentário madureira')
+#impedimento_dao.impedimento_add('maia', 'LICENCAS/DISPENSAS REGULAMENTARES', '01/02/2020', '01/02/2020', 'comentário helder')
 
 #impedimento_dao.impedimento_remove('cunha', '21/01/2020')
 #impedimento_dao.impedimento_update('madureira', '11/01/2020', observacao='nova observacao', data_fim='22/01/2020')

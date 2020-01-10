@@ -254,8 +254,8 @@ class ServicoDAO:
             if 'conn' in locals():
                 conn.close()
 
-        qtd_de_servicos_por_dia_dict = dict()
-        for el in qtd_de_servicos_por_dia_list:            
+        qtd_de_servicos_por_dia_dict = dict()        
+        for el in qtd_de_servicos_por_dia_list:           
             data = functions.date_str_to_datetime(el[0])
             qtd_de_servicos_por_dia_dict[data] = {'soma_turnos':el[1], 'cont_datas': el[2]}        
         return qtd_de_servicos_por_dia_dict

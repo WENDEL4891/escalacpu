@@ -50,7 +50,7 @@ class Impedimento:
         if not isinstance(tipo, str):
             raise TypeError('Tipo deve ser do tipo string.')        
         if not tipo.upper() in tipos:
-            raise ValueError('Tipo não cadastrado.')
+            raise ValueError('Tipo não cadastrados. Deve ser usado um, dentre os valores: ' + ', '.join(tipos))
         self.__tipo = tipo.upper()
     
     @data_inicio.setter

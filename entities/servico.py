@@ -60,7 +60,7 @@ class Servico:
             else:
                 raise ValueError('Nome de guerra não cadastrado: {}.'.format(_cpu.upper()))
         else:    
-            raise TypeError('O parâmetro nome_de_guerra deve receber um argumento do tipo string ou um objeto da classe cpu.Cpu.')
+            raise TypeError("O parâmetro _cpu deve receber um argumento do tipo string ou um objeto da classe cpu.Cpu. Foi passado {}".format(str(type(_cpu))))
         
     
     @nome_estagio.setter
