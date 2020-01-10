@@ -3,6 +3,7 @@ from entities import cpu, servico
 import services.functions
 import myexceptions
 import copy
+import datetime
 
 
 class FilaPorModalidade:
@@ -140,6 +141,14 @@ class FilaPorModalidade:
         
         fila_str = 'Fila = {} '.format(self.modalidade) + '{\n'
         for i in range(len(self.fila)):
-            fila_str += '\t{}: {} {}\n'.format(i + 1, self.fila[i].pg, self.fila[i].nome_de_guerra)
+            if self.modalidade == 'fds':
+                fila_str += '\t{:<2}: {:22} | Último serviço: {:10} | Serviços em sequência: {}\n'.format(
+                    i + 1,
+                    self.fila[i].pg + " " + self.fila[i].nome_de_guerra,
+                    datetime.datetime.strftime(max(self.fila[i].servicos_fds).data, '%d/%m/%Y') if len(self.fila[i].servicos_fds) else '---',
+                    self.fila[i].get_fds_em_sequencia()
+                )
+            else:
+                fila_str += '\t{:<2}: {:22}\n'.format(i + 1, self.fila[i].pg + " " + self.fila[i].nome_de_guerra)
         fila_str += '}'
         return fila_str

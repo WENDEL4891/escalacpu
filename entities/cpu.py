@@ -13,7 +13,7 @@ class Cpu:
         self.funcao = funcao
         self.curso = curso
         self.ano_base = ano_base
-        self.servicos_fds = list()        
+        self.servicos_fds = None        
         
     
     @property
@@ -39,6 +39,10 @@ class Cpu:
     @property
     def ano_base(self):
         return self.__ano_base
+    
+    @property
+    def servicos_fds(self):
+        return self.__servicos_fds
     
     
     @pg.setter
@@ -98,6 +102,10 @@ class Cpu:
         if not 1980 <= ano_base <= datetime.datetime.now().year:
             raise ValueError('Ano base inválido.')
         self.__ano_base = ano_base
+    
+    @servicos_fds.setter
+    def servicos_fds(self, aux_not_used):
+        self.__servicos_fds = list()
     
     def get_fds_em_sequencia(self):                
         fds_em_sequencia = 0
