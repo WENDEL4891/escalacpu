@@ -232,7 +232,7 @@ class EscalarSemana:
         for _servico in self.servicos_para_completar_list:            
             self.escalar_por_modalidade(_servico.get_modalidade())
         
-        print(self.gerenciador_de_filas.filas['fds'])
+        print(self.gerenciador_de_filas.filas['sab_3'])
     
     def escalar_por_modalidade(self, modalidade):
         servicos = list(filter(lambda _servico: _servico.get_modalidade() == modalidade, self.servicos_para_completar_list))

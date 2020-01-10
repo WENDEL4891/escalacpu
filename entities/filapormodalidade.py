@@ -69,9 +69,9 @@ class FilaPorModalidade:
                     _cpu.servicos_fds.append(_servico)
                     break
             if cpu_not_in_fila:
-                servico_para_incluir = _servico.cpu
-                servico_para_incluir.servicos_fds.append(_servico)
-                self.fila.insert(0, servico_para_incluir)
+                cpu_para_incluir = _servico.cpu
+                cpu_para_incluir.servicos_fds.append(_servico)
+                self.fila.insert(0, cpu_para_incluir)
         
         
     def fds_add(self, _servico):

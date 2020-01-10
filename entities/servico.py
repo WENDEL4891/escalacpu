@@ -105,7 +105,7 @@ class Servico:
             return True
         if self.get_weekday() in weekday:
             return False
-        raise myexceptions.LogicException('O método is_weekend() está retornando algum valór inapropriado.')
+        raise myexceptions.LogicException('O método is_weekend() está retornando algum valor inapropriado.')
     
     def get_weekday(self):
         return config.dias_da_semana[self.data.weekday()]
