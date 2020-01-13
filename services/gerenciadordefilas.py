@@ -176,6 +176,7 @@ class GerenciadorDeFilas:
 
 
     def number_week_and_year(self, _servico):
+        print()
         if not isinstance(_servico, servico.Servico):
             raise TypeError('O parâmetro _servico deve receber um argumento do tipo servico.Servico. Foi passado {}.'.format(str(type(_servico))))
         

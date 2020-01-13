@@ -25,6 +25,8 @@ class EscalarSemana:
         self.data_sabado = self.data_sexta + datetime.timedelta(days=1)
         self.data_domingo = self.data_sabado + datetime.timedelta(days=1)
 
+        self.servicos_completos_list = servicodao.ServicoDAO().get_servicos(self.data_segunda, self.data_domingo)
+
         self.feriados = feriadodao.FeriadoDAO().get_feriados(self.data_segunda, self.data_domingo)
         self.impedimentos = impedimentodao.ImpedimentoDAO().get_impedimentos_from_date(self.data_segunda, self.data_domingo)
         
@@ -42,14 +44,21 @@ class EscalarSemana:
     
     @impedimentos.setter
     def impedimentos(self, impedimentos_obj_list):
+        '''
+        
+        '''
         impedimentos = dict()
         for data in self.dias_e_turnos_seg_a_dom_dict.keys():
-            impedimentos[data] = dict()
+            turnos = dict()
+            for i in range(1,4):
+                turnos[i] = list()
+            impedimentos[data] = turnos
         for impedimento_obj in impedimentos_obj_list:
             data = impedimento_obj.data_inicio
             while data <= impedimento_obj.data_fim:
-                if data in impedimentos.keys():
-                    impedimentos[data][impedimento_obj.nome_de_guerra] = impedimento_obj.tipo
+                if data in self.dias_e_turnos_seg_a_dom_dict.keys():
+                    for i in range(1, 4):
+                        impedimentos[data][i].append(impedimento_obj.nome_de_guerra)
                 data += datetime.timedelta(days=1)
         self.__impedimentos = impedimentos
 
@@ -181,7 +190,9 @@ class EscalarSemana:
             if len(servico_para_completar_seg_2t) == 1:
                 if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos[servico_para_completar_seg_2t[0].data]:
                     servico_para_completar_seg_2t[0].cpu = cpu_empenhos_seg_dom                    
-                    servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_seg_2t[0])
+                    
+                    self.escalar_e_atualizar_listas(servico_para_completar_seg_2t[0])
+
                     logs_escalar_militares_tm['seg_2t sucesso'] = True
                     logs_escalar_militares_tm['seg_2t'] = cpu_empenhos_seg_dom.nome_de_guerra
                 else:
@@ -194,7 +205,9 @@ class EscalarSemana:
             if len(servico_para_completar_dom_2t) == 1:
                 if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos[servico_para_completar_dom_2t[0].data]:
                     servico_para_completar_dom_2t[0].cpu = cpu_empenhos_seg_dom                    
-                    servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_dom_2t[0])
+                    
+                    self.escalar_e_atualizar_listas(servico_para_completar_dom_2t[0])
+
                     logs_escalar_militares_tm['dom_2t sucesso'] = True
                     logs_escalar_militares_tm['dom_2t'] = cpu_empenhos_seg_dom.nome_de_guerra
                 else:
@@ -213,7 +226,9 @@ class EscalarSemana:
             if len(servico_para_completar_ter_2t) == 1:
                 if cpu_empenho_ter.nome_de_guerra not in self.impedimentos[servico_para_completar_ter_2t[0].data]:
                     servico_para_completar_ter_2t[0].cpu = cpu_empenho_ter
-                    servicodao.ServicoDAO().servico_add(_servico=servico_para_completar_ter_2t[0])
+                    
+                    self.escalar_e_atualizar_listas(servico_para_completar_ter_2t[0])
+
                     logs_escalar_militares_tm['ter_2t sucesso'] = True
                     logs_escalar_militares_tm['ter_2t'] = cpu_empenho_ter.nome_de_guerra
                 else:
@@ -229,9 +244,64 @@ class EscalarSemana:
         return logs_escalar_militares_tm
     
     def escalar_fds(self):
-        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
-        for _servico in self.servicos_para_completar_list:            
-            self.escalar_por_modalidade(_servico)
+        #servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
+
+        servico_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
+        if len(servico_para_completar_sab_3):
+            sab_3 = servico_para_completar_sab_3[0]
+            self.gerenciador_de_filas.filas['fds'].fila.sort(
+                key = lambda _cpu: (
+                    max(list(map(self.gerenciador_de_filas.number_week_and_year, _cpu.servicos_fds))) if len(_cpu.servicos_fds) else 0,
+                    _cpu.get_fds_em_sequencia(),
+                    self.gerenciador_de_filas.filas['sab_3'].fila.index(_cpu),
+                    max(list(map(lambda _servico: _servico, _cpu.servicos_fds))) if len(_cpu.servicos_fds) else 0
+                )
+            )
+        
+            print(self.gerenciador_de_filas.filas['fds'])
+        
+        
+                
+        #servicos_para_completar_fds.sort(
+        #    key = lambda _servico: (
+        #        _servico.get_ordem_prioridade_fds_para_empenhar(),
+        #        _servico.data
+        #    )
+        #)
+
+        #cpus_empenhos_fds = list()
+        #for _cpu in self.gerenciador_de_filas.filas['fds'].fila:
+        #    cond1 = _cpu.nome_de_guerra not in self.impedimentos[self.data_sexta]
+        #    cond2 = _cpu.nome_de_guerra not in self.impedimentos[self.data_sabado]
+        #    cond3 = _cpu.nome_de_guerra not in self.impedimentos[self.data_domingo]
+
+         #   if cond1 or cond2 or cond3:                
+         #       cpus_empenhos_fds.append(_cpu)
+         #   if len(cpus_empenhos_fds) == 7:
+         #       break
+        
+        #for i in self.impedimentos.items():
+        #    print(i)
+        
+        
+        
+        #for _servico in self.servicos_para_completar_list:
+        #    print(_servico)
+        #print('-' * 40 + '\n')
+
+        #for _servico in self.servicos_completos_list:
+        #    print(_servico)
+        #print('-' * 40 + '\n')
+        #
+
+        #print('não completos: {}'.format(len(self.servicos_para_completar_list)))
+        #print('completos: {}'.format(len(self.servicos_completos_list)))
+
+
+        
+        
+        #for _servico in self.servicos_para_completar_list:            
+        #    self.escalar_por_modalidade(_servico)
                 
         #print(self.gerenciador_de_filas.filas['fds'])
     
@@ -243,11 +313,34 @@ class EscalarSemana:
             _pula += 1
             #implementar exceção, para evitar loop infinito
             next = self.gerenciador_de_filas.filas[modalidade].show_next_membro(pula=_pula)
-        #next = self.gerenciador_de_filas.filas[modalidade].get_next_membro(pula=_pula)
+        next = self.gerenciador_de_filas.filas[modalidade].get_next_membro(pula=_pula)
         _servico.cpu = next
         servicodao.ServicoDAO().servico_add(_servico=_servico)
+    
+    def escalar_por_modalidade_fds(self, _servico):        
+        _pula = 0
+        next = self.gerenciador_de_filas.filas['fds'].show_next_membro(pula=_pula)
+        while next.nome_de_guerra in self.impedimentos[_servico.data]:
+            _pula += 1
+            #implementar exceção, para evitar loop infinito
+            next = self.gerenciador_de_filas.filas[modalidade].show_next_membro(pula=_pula)
+        next = self.gerenciador_de_filas.filas['fds'].get_next_membro(pula=_pula)
+        index_fila_modalidade = self.gerenciador_de_filas.filas[_servico.get_modalidade()].fila.index(next)
+
+        _servico.cpu = next
+        servicodao.ServicoDAO().servico_add(_servico=_servico)
+    
+
             
 
-
-
-        
+    def escalar_e_atualizar_listas(self, _servico):
+        if not isinstance(_servico, servico.Servico):
+            raise TypeError('O argumento deve ser do tipo servico.Servico. Foi passado {}.'.format(str(type(_servico))))
+        try:
+            index_servico = self.servicos_para_completar_list.index(_servico)
+        except ValueError:
+            raise myexceptions.LogicException('O método EscalarSemana().escalar_militares_tm() está tentando escalar serviço que já estava completo.')
+        servicodao.ServicoDAO().servico_add(_servico=_servico)
+        self.servicos_completos_list.append(
+            self.servicos_para_completar_list.pop(index_servico)
+        )

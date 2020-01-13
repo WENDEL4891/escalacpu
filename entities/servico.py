@@ -115,6 +115,19 @@ class Servico:
             return True
         return False
     
+    def get_ordem_prioridade_fds_para_empenhar(self):
+        if not self.is_weekend():
+            raise myexceptions.LogicException('O serviço não é fds.')
+        if self.get_modalidade() == 'sab_3':
+            return 0
+        if self.get_modalidade() == 'sex_3':
+            return 1
+        if self.get_modalidade() == 'dom_3':
+            return 2
+        if self.get_modalidade() == 'fds_12':
+            return 3
+        
+    
     def __str__(self):
         return 'Data: {} | Turno: {} | P/G Nome de guerra: {}{}'.format(
             datetime.datetime.strftime(self.data, '%d/%m/%Y'),
@@ -136,10 +149,8 @@ class Servico:
         if other_servico == None:
             return False
         data_eq = self.data == other_servico.data
-        turno_eq = self.turno == other_servico.turno
-        cpu_eq = self.cpu.nome_de_guerra == other_servico.cpu.nome_de_guerra
-        nome_estagio_eq = self.nome_estagio == other_servico.nome_estagio
-        return data_eq and turno_eq and cpu_eq and nome_estagio_eq
+        turno_eq = self.turno == other_servico.turno        
+        return data_eq and turno_eq
 
     def __gt__(self, other_servico):
         if self.data == other_servico.data:

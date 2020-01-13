@@ -179,7 +179,10 @@ class ServicoDAO:
         if servico_atualizador.cpu.nome_de_guerra == 'DEFAULT':
             raise myexceptions.OperationalException('O serviço com nome de guerra DEFAULT não pode ser inserido no banco de dados.')
 
-        if servico_para_ser_atualizado == servico_atualizador:
+        cond1 = servico_para_ser_atualizado == servico_atualizador
+        cond2 = servico_atualizador.cpu.nome_de_guerra == servico_para_ser_atualizado.cpu.nome_de_guerra
+        cond3 = servico_atualizador.nome_estagio == servico_para_ser_atualizado.cpu.nome_estagio
+        if cond1 and cond2 and cond3:
             raise myexceptions.LogicException('Não foi informado nenhum dado novo para atualizar o serviço.')
                 
         complemento_query = ''

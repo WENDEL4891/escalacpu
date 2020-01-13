@@ -116,7 +116,6 @@ print('sem_3', queue.getNext("sem_3")) """
 #cpu_dao.cpu_remove('NOVO CPU9')
 #cpu_dao.cpu_remove('NOVO CPU3')
 #_escalar = escalar.Escalar()
-escalarsemana.EscalarSemana().escalar_seg_a_dom()
 
 #data = datetime.datetime.strptime('01/02/2020', '%d/%m/%Y').date()
 #while data < datetime.datetime.strptime('03/02/2020', '%d/%m/%Y').date():
@@ -195,3 +194,17 @@ escalarsemana.EscalarSemana().escalar_seg_a_dom()
 #print(fila_seg_12)
 #print(fila_seg_12.get_next_membro(2))
 #print(fila_seg_12)
+
+
+#l = [
+#    servico.Servico('10/10/2020', 2, 'RENAN'),
+#    servico.Servico('10/10/2020', 1, 'MADUREIRA')
+#]
+#
+#servico_c = servico.Servico('10/10/2020', 2, 'DIMITRI')
+#print(servico_c)
+#print(servico_c == l[0])
+#print(servico_c in l)
+
+
+escalarsemana.EscalarSemana().escalar_seg_a_dom(escalar_tm=True)
