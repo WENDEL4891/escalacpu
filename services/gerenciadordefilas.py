@@ -10,8 +10,7 @@ class GerenciadorDeFilas:
         self.servicos_em_ordem_decrescente = data_fim
         self.servicos_em_ordem_decrescente_sem_tm = self.servicos_em_ordem_decrescente
 
-        self.filas = None
-        
+        self.filas = None        
     
     
     @property
@@ -61,6 +60,7 @@ class GerenciadorDeFilas:
         for _servico in servicos_fds:            
             filas['fds'].membro_add_ultimo_para_primeiro(_servico)
         
+        
         filas['fds'].fila.sort(
             key = lambda _cpu: (
                 max(list(map(self.number_week_and_year, _cpu.servicos_fds))),
@@ -68,6 +68,7 @@ class GerenciadorDeFilas:
                 max(list(map(lambda _servico: _servico, _cpu.servicos_fds)))
             )
         )
+        
 
         if len(filas['fds'].fila) < len(self.cpu_dao.cpus_sem_tm):            
             for _cpu in self.cpu_dao.cpus_sem_tm:
@@ -175,8 +176,7 @@ class GerenciadorDeFilas:
         self.__filas = filas
 
 
-    def number_week_and_year(self, _servico):
-        print()
+    def number_week_and_year(self, _servico):        
         if not isinstance(_servico, servico.Servico):
             raise TypeError('O parâmetro _servico deve receber um argumento do tipo servico.Servico. Foi passado {}.'.format(str(type(_servico))))
         

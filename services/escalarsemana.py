@@ -10,13 +10,13 @@ import pprint
 
 class EscalarSemana:
 
-    def __init__(self):
+    def __init__(self):        
         self.dias_e_turnos_seg_a_dom_dict = servicodao.ServicoDAO().get_dias_e_turnos_para_escalar()
         self.servicos_para_completar_list = list()
         for data, turnos in self.dias_e_turnos_seg_a_dom_dict.items():            
             for turno in turnos:
                 self.servicos_para_completar_list.append(servico.Servico(data, turno, 'CPU_NONE'))
-
+        
         self.data_segunda = min(self.dias_e_turnos_seg_a_dom_dict)
         self.data_terca = self.data_segunda + datetime.timedelta(days=1)
         self.data_quarta = self.data_terca + datetime.timedelta(days=1)
@@ -34,9 +34,9 @@ class EscalarSemana:
         self.cpus = cpudao.CpuDAO().get_cpus()
         self.cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
         self.cpus_nao_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
-        self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(self.data_domingo)
+        self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(self.data_domingo)        
 
-        self.servicos_tm_escalados = list()
+        self.servicos_tm_escalados = list()        
     
     @property
     def impedimentos(self):
@@ -63,7 +63,8 @@ class EscalarSemana:
         self.__impedimentos = impedimentos
 
        
-    def escalar_seg_a_dom(self, escalar_tm=True):
+    def escalar_seg_a_dom(self, escalar_tm=True):        
+
 
         if escalar_tm:
             logs_escalar_militares_tm = self.escalar_militares_tm()
@@ -74,12 +75,6 @@ class EscalarSemana:
 
         #for mens in logs_escalar_militares_tm.items():
         #    pp.pprint(mens)
-        
-        #dois_meses_antes = max(self.dias_e_turnos_seg_a_dom_dict) - datetime.timedelta(days=65)
-        #gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(dois_meses_antes, max(self.dias_e_turnos_seg_a_dom_dict))
-        #
-        #print(gerenciador_de_filas.fila_dom_3)
-        #print(self.gerenciador_de_filas.fila_dom_3)
         
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_para_completar_list))
@@ -244,7 +239,34 @@ class EscalarSemana:
         return logs_escalar_militares_tm
     
     def escalar_fds(self):
-        #servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
+        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
+        qtd_servicos_fds_para_completar = len(servicos_para_completar_fds)
+        #print(self.impedimentos)
+        #for i in self.impedimentos.items():
+        #    print(i)
+        
+        impedimentos_fds = {data:self.impedimentos[data] for data in self.impedimentos if data.weekday() in (4, 5, 6)}
+        impedimentos_fds[self.data_sexta].pop(1)
+        impedimentos_fds[self.data_sexta].pop(2)
+
+        
+        result = list()
+        primeira_iteracao = True
+        for data, impedimentos in impedimentos_fds.items():            
+            for turno, _impedimentos in impedimentos.items():
+                if primeira_iteracao:
+                    result = _impedimentos
+                    primeira_iteracao = False
+                result = list(set(result) & set(_impedimentos))
+        
+        print(result)
+                
+                
+
+        
+        
+        
+        
 
         servico_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
         if len(servico_para_completar_sab_3):
@@ -258,7 +280,7 @@ class EscalarSemana:
                 )
             )
         
-            print(self.gerenciador_de_filas.filas['fds'])
+            #print(self.gerenciador_de_filas.filas['fds'])
         
         
                 

@@ -207,4 +207,5 @@ print('sem_3', queue.getNext("sem_3")) """
 #print(servico_c in l)
 
 
+
 escalarsemana.EscalarSemana().escalar_seg_a_dom(escalar_tm=True)
