@@ -27,25 +27,32 @@ class EscalarSemana:
 
         self.servicos_completos_list = servicodao.ServicoDAO().get_servicos(self.data_segunda, self.data_domingo)
 
-        self.feriados = feriadodao.FeriadoDAO().get_feriados(self.data_segunda, self.data_domingo)
-        self.impedimentos = impedimentodao.ImpedimentoDAO().get_impedimentos_from_date(self.data_segunda, self.data_domingo)
-        
-        
         self.cpus = cpudao.CpuDAO().get_cpus()
         self.cpus_tm = list(filter(lambda _cpu: _cpu.funcao == 'TM', self.cpus))
         self.cpus_nao_tm = list(filter(lambda _cpu: _cpu.funcao != 'TM', self.cpus))
-        self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(self.data_domingo)        
+        self.gerenciador_de_filas = gerenciadordefilas.GerenciadorDeFilas(self.data_domingo)
+
+        self.feriados = feriadodao.FeriadoDAO().get_feriados(self.data_segunda, self.data_domingo)
+        impedimentos = impedimentodao.ImpedimentoDAO().get_impedimentos_from_date(self.data_segunda, self.data_domingo)
+        self.impedimentos_por_dia = impedimentos
+        self.impedimentos_por_militar = impedimentos
+
 
         self.servicos_tm_escalados = list()        
     
     @property
-    def impedimentos(self):
-        return self.__impedimentos
+    def impedimentos_por_dia(self):
+        return self.__impedimentos_por_dia
     
-    @impedimentos.setter
-    def impedimentos(self, impedimentos_obj_list):
+    @property
+    def impedimentos_por_militar(self):
+        return self.__impedimentos_por_militar
+    
+    @impedimentos_por_dia.setter
+    def impedimentos_por_dia(self, impedimentos_obj_list):
         '''
-        
+            Popula um dicionário, tendo como chaves as datas da semana corrente e como valores uma lista, para cada dia,
+            os nomes de guerra dos cpus que tem impedimento naquele dia.
         '''
         impedimentos = dict()
         for data in self.dias_e_turnos_seg_a_dom_dict.keys():
@@ -60,7 +67,34 @@ class EscalarSemana:
                     for i in range(1, 4):
                         impedimentos[data][i].append(impedimento_obj.nome_de_guerra)
                 data += datetime.timedelta(days=1)
-        self.__impedimentos = impedimentos
+        self.__impedimentos_por_dia = impedimentos
+
+    @impedimentos_por_militar.setter
+    def impedimentos_por_militar(self, impedimentos_obj_list):
+        '''
+            Popula um dicionário, tendo como chaves os nomes dos cpus cadastrados e como valores uma lista, para cada um,
+            com as datas em que eles estão com impedimento.
+        '''
+        impedimentos = dict()
+        nomes_de_guerra = list(map(lambda _cpu: _cpu.nome_de_guerra, self.cpus))
+        for nome_de_guerra in nomes_de_guerra:
+            impedimentos[nome_de_guerra] = dict()            
+
+        #for data in self.dias_e_turnos_seg_a_dom_dict.keys():
+        #    turnos = dict()
+        #    for i in range(1,4):
+        #        turnos[i] = list()
+        #    impedimentos[data] = turnos
+        for impedimento_obj in impedimentos_obj_list:
+            data = impedimento_obj.data_inicio
+            while data <= impedimento_obj.data_fim:                
+                if data in self.dias_e_turnos_seg_a_dom_dict.keys():
+                    if impedimento_obj.nome_de_guerra in nomes_de_guerra:
+                        impedimentos[impedimento_obj.nome_de_guerra][data] = list()
+                        for i in range(1, 4):
+                            impedimentos[impedimento_obj.nome_de_guerra][data].append(i)
+                data += datetime.timedelta(days=1)
+        self.__impedimentos_por_militar = impedimentos
 
        
     def escalar_seg_a_dom(self, escalar_tm=True):        
@@ -242,16 +276,29 @@ class EscalarSemana:
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         qtd_servicos_fds_para_completar = len(servicos_para_completar_fds)
         #print(self.impedimentos)
-        #for i in self.impedimentos.items():
+        #for i in self.impedimentos_por_militar.items():
         #    print(i)
         
-        impedimentos_fds = {data:self.impedimentos[data] for data in self.impedimentos if data.weekday() in (4, 5, 6)}
-        impedimentos_fds[self.data_sexta].pop(1)
-        impedimentos_fds[self.data_sexta].pop(2)
+        impedimentos_por_dia_fds = {data:self.impedimentos_por_dia[data] for data in self.impedimentos_por_dia if data.weekday() in (4, 5, 6)}
+        impedimentos_por_dia_fds[self.data_sexta].pop(1)
+        impedimentos_por_dia_fds[self.data_sexta].pop(2)
 
-        #for i in impedimentos_fds.items():
+        impedimentos_por_militar_fds = dict()
+        for nome_de_guerra, datas in self.impedimentos_por_militar.items():
+            impedimentos_por_militar_fds[nome_de_guerra] = dict()
+            for data, turnos in datas.items():
+                if data.weekday() in (5, 6):
+                    impedimentos_por_militar_fds[nome_de_guerra][data] = turnos
+                if data.weekday() == 4:
+                    if 3 in turnos:
+                        impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
+
+        for i in impedimentos_por_militar_fds.items():
+            print(i)
+        
+        #for i in impedimentos_por_dia_fds.items():
         #    print(i)
-        print(self.gerenciador_de_filas.filas['qui_3'])
+        #print(self.gerenciador_de_filas.filas['qui_3'])
 
         
         
