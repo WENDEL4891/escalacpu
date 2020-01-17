@@ -75,105 +75,31 @@ class GerenciadorDeFilas:
                 if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['fds'].fila)):
                     filas['fds'].membro_add_primeiro_para_ultimo(_cpu)
         
-
-        servicos_sem_12 = list(filter(lambda _servico:_servico.get_modalidade() == 'sem_12', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_sem_12:                        
-            filas['sem_12'].membro_add_ultimo_para_primeiro(_servico)
         
-        if len(filas['sem_12'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['sem_12'].fila)):
-                    filas['sem_12'].membro_add_primeiro_para_ultimo(_cpu)
+        def set_filas_por_modalidade(modalidade, filas):
+            servicos = list(filter(lambda _servico:_servico.get_modalidade() == modalidade, self.servicos_em_ordem_decrescente_sem_tm))        
+            for _servico in servicos:                        
+                filas[modalidade].membro_add_ultimo_para_primeiro(_servico)
+            
+            if len(filas[modalidade].fila) < len(self.cpu_dao.cpus_sem_tm):            
+                for _cpu in self.cpu_dao.cpus_sem_tm:
+                    if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas[modalidade].fila)):
+                        filas[modalidade].membro_add_primeiro_para_ultimo(_cpu)
 
 
-
-        servicos_sem_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_3', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_sem_3:                        
-            filas['sem_3'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['sem_3'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['sem_3'].fila)):
-                    filas['sem_3'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_qua_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_2', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_qua_2:                        
-            filas['qua_2'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['qua_2'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['qua_2'].fila)):
-                    filas['qua_2'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_qui_3:                        
-            filas['qui_3'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['qui_3'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['qui_3'].fila)):
-                    filas['qui_3'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_sex_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_2', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_sex_2:                        
-            filas['sex_2'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['sex_2'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['sex_2'].fila)):
-                    filas['sex_2'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_sex_3:                        
-            filas['sex_3'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['sex_3'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['sex_3'].fila)):
-                    filas['sex_3'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_fds_12 = list(filter(lambda _servico:_servico.get_modalidade() == 'fds_12', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_fds_12:                        
-            filas['fds_12'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['fds_12'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['fds_12'].fila)):
-                    filas['fds_12'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_sab_3:                        
-            filas['sab_3'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['sab_3'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['sab_3'].fila)):
-                    filas['sab_3'].membro_add_primeiro_para_ultimo(_cpu)
-
-
-
-        servicos_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', self.servicos_em_ordem_decrescente_sem_tm))        
-        for _servico in servicos_dom_3:                        
-            filas['dom_3'].membro_add_ultimo_para_primeiro(_servico)
-        
-        if len(filas['dom_3'].fila) < len(self.cpu_dao.cpus_sem_tm):            
-            for _cpu in self.cpu_dao.cpus_sem_tm:
-                if _cpu.nome_de_guerra not in list(map(lambda _cpu: _cpu.nome_de_guerra, filas['dom_3'].fila)):
-                    filas['dom_3'].membro_add_primeiro_para_ultimo(_cpu)
+        set_filas_por_modalidade('sem_12', filas)
+        set_filas_por_modalidade('sem_3', filas)
+        set_filas_por_modalidade('qua_2', filas)
+        set_filas_por_modalidade('qui_3', filas)
+        set_filas_por_modalidade('sex_2', filas)
+        set_filas_por_modalidade('sex_3', filas)
+        set_filas_por_modalidade('fds_12', filas)
+        set_filas_por_modalidade('sab_3', filas)
+        set_filas_por_modalidade('dom_3', filas)
+                
 
         self.__filas = filas
+    
 
 
     def number_week_and_year(self, _servico):        

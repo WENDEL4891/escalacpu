@@ -249,17 +249,12 @@ class EscalarSemana:
         impedimentos_fds[self.data_sexta].pop(1)
         impedimentos_fds[self.data_sexta].pop(2)
 
+        #for i in impedimentos_fds.items():
+        #    print(i)
+        print(self.gerenciador_de_filas.filas['qui_3'])
+
         
-        result = list()
-        primeira_iteracao = True
-        for data, impedimentos in impedimentos_fds.items():            
-            for turno, _impedimentos in impedimentos.items():
-                if primeira_iteracao:
-                    result = _impedimentos
-                    primeira_iteracao = False
-                result = list(set(result) & set(_impedimentos))
         
-        print(result)
                 
                 
 
