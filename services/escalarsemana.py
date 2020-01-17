@@ -217,7 +217,7 @@ class EscalarSemana:
         
         if cpu_empenhos_seg_dom != None:                
             if len(servico_para_completar_seg_2t) == 1:
-                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos[servico_para_completar_seg_2t[0].data]:
+                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos_por_dia[servico_para_completar_seg_2t[0].data]:
                     servico_para_completar_seg_2t[0].cpu = cpu_empenhos_seg_dom                    
                     
                     self.escalar_e_atualizar_listas(servico_para_completar_seg_2t[0])
@@ -232,7 +232,7 @@ class EscalarSemana:
                 logs_escalar_militares_tm['seg_2t sucesso'] = False
             
             if len(servico_para_completar_dom_2t) == 1:
-                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos[servico_para_completar_dom_2t[0].data]:
+                if cpu_empenhos_seg_dom.nome_de_guerra not in self.impedimentos_por_dia[servico_para_completar_dom_2t[0].data]:
                     servico_para_completar_dom_2t[0].cpu = cpu_empenhos_seg_dom                    
                     
                     self.escalar_e_atualizar_listas(servico_para_completar_dom_2t[0])
@@ -253,7 +253,7 @@ class EscalarSemana:
         
         if cpu_empenho_ter != None:
             if len(servico_para_completar_ter_2t) == 1:
-                if cpu_empenho_ter.nome_de_guerra not in self.impedimentos[servico_para_completar_ter_2t[0].data]:
+                if cpu_empenho_ter.nome_de_guerra not in self.impedimentos_por_dia[servico_para_completar_ter_2t[0].data]:
                     servico_para_completar_ter_2t[0].cpu = cpu_empenho_ter
                     
                     self.escalar_e_atualizar_listas(servico_para_completar_ter_2t[0])
@@ -293,8 +293,10 @@ class EscalarSemana:
                     if 3 in turnos:
                         impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
 
-        for i in impedimentos_por_militar_fds.items():
-            print(i)
+        for nome, data_turnos in impedimentos_por_militar_fds.items():
+            print(nome, data_turnos)
+            for data, turnos in data_turnos.items():
+                print(nome, data, turnos)
         
         #for i in impedimentos_por_dia_fds.items():
         #    print(i)
