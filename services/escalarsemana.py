@@ -7,6 +7,7 @@ import config
 import sys
 import myexceptions
 import pprint
+import itertools
 
 class EscalarSemana:
 
@@ -275,13 +276,12 @@ class EscalarSemana:
     def escalar_fds(self):
         servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
         qtd_servicos_fds_para_completar = len(servicos_para_completar_fds)
-        #print(self.impedimentos)
-        #for i in self.impedimentos_por_militar.items():
-        #    print(i)
+
         
-        impedimentos_por_dia_fds = {data:self.impedimentos_por_dia[data] for data in self.impedimentos_por_dia if data.weekday() in (4, 5, 6)}
-        impedimentos_por_dia_fds[self.data_sexta].pop(1)
-        impedimentos_por_dia_fds[self.data_sexta].pop(2)
+        nomes_combinacoes = self.get_nomes_fds()
+        #for n in nomes_combinacoes:
+        #    print(n)        
+        
 
         impedimentos_por_militar_fds = dict()
         for nome_de_guerra, datas in self.impedimentos_por_militar.items():
@@ -293,21 +293,7 @@ class EscalarSemana:
                     if 3 in turnos:
                         impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
 
-        for i in impedimentos_por_militar_fds.items():
-            print(i)
-        
-        #for i in impedimentos_por_dia_fds.items():
-        #    print(i)
-        #print(self.gerenciador_de_filas.filas['qui_3'])
-
-        
-        
-                
-                
-
-        
-        
-        
+               
         
 
         servico_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
@@ -368,6 +354,105 @@ class EscalarSemana:
         #    self.escalar_por_modalidade(_servico)
                 
         #print(self.gerenciador_de_filas.filas['fds'])
+    
+    
+    def get_nomes_fds(self):
+        
+        def get_nomes_por_dia_turno_fds(acrescimo=0):
+            total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
+            if 6 + acrescimo > total_membros_fila_fds - 1:
+                raise myexceptions.LogicException('Há apenas {} nomes na fila de fds. Não há membro de índice {} ou superior.'.format(total_membros_fila_fds, total_membros_fila_fds))
+
+            nomes_fila = [nome.nome_de_guerra for nome in self.gerenciador_de_filas.filas['fds'].fila if self.gerenciador_de_filas.filas['fds'].fila.index(nome) <= 6 + acrescimo]
+
+                        
+            impedimentos_fds_por_dia_turno = dict()
+            for data, dict_turnos in self.impedimentos_por_dia.items():            
+                if data.weekday() == 4:
+                    for turno, nomes_de_guerra in dict_turnos.items():
+                        if turno == 3:
+                            impedimentos_fds_por_dia_turno['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
+                if data.weekday() in (5, 6):
+                    for turno, nomes_de_guerra in dict_turnos.items():
+                        impedimentos_fds_por_dia_turno['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
+                        
+            nomes_disponiveis_por_dia_turno_fds = {
+                dia_turno:list(set(nomes_fila) - set(nomes)) for dia_turno, nomes in impedimentos_fds_por_dia_turno.items()
+            }
+            return nomes_disponiveis_por_dia_turno_fds
+                
+        def get_combinacoes(nomes_disponiveis_por_dia_turno_fds):
+            combinacoes = list()            
+            for nome_sex_3 in nomes_disponiveis_por_dia_turno_fds["sex_3"]:                
+                combinacao = list()
+                combinacao.append(nome_sex_3)                
+                for nome_sab_1 in nomes_disponiveis_por_dia_turno_fds["sab_1"]:
+                    if nome_sab_1 in combinacao:
+                        continue
+                    combinacao.append(nome_sab_1)
+                    for nome_sab_2 in nomes_disponiveis_por_dia_turno_fds["sab_2"]:
+                        if nome_sab_2 in combinacao:
+                            continue
+                        combinacao.append(nome_sab_2)
+                        for nome_sab_3 in nomes_disponiveis_por_dia_turno_fds["sab_3"]:
+                            if nome_sab_3 in combinacao:
+                                continue
+                            combinacao.append(nome_sab_3)
+                            for nome_dom_1 in nomes_disponiveis_por_dia_turno_fds["dom_1"]: 
+                                if nome_dom_1 in combinacao:
+                                    continue
+                                combinacao.append(nome_dom_1)
+                                for nome_dom_2 in nomes_disponiveis_por_dia_turno_fds["dom_2"]:             
+                                    if nome_dom_2 in combinacao:
+                                        continue
+                                    combinacao.append(nome_dom_2)
+                                    for nome_dom_3 in nomes_disponiveis_por_dia_turno_fds["dom_3"]:                         
+                                        if nome_dom_3 in combinacao:
+                                            continue
+                                        combinacao.append(nome_dom_3)
+                                        if len(combinacao) == 7:
+                                            combinacoes.append(combinacao)
+                                        for c in combinacoes:
+                                            print(c)
+                                            
+            return combinacoes
+        
+               
+        total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
+        nomes_fds = get_nomes_por_dia_turno_fds()
+        combinacoes = get_combinacoes(nomes_fds)
+        acrescimo = 0
+        while len(combinacoes) == 0:
+            acrescimo += 1
+            nomes_fds = get_nomes_por_dia_turno_fds(acrescimo)
+            combinacoes = get_combinacoes(nomes_fds)
+                
+        
+        return combinacoes
+
+
+        
+        
+        
+        
+        """ count = 0
+        for combinacao in itertools.product(
+            nomes_disponiveis_por_dia_turno["sex_3"],
+            nomes_disponiveis_por_dia_turno["sab_1"],
+            nomes_disponiveis_por_dia_turno["sab_2"],
+            nomes_disponiveis_por_dia_turno["sab_3"],
+            nomes_disponiveis_por_dia_turno["dom_1"],
+            nomes_disponiveis_por_dia_turno["dom_2"],
+            nomes_disponiveis_por_dia_turno["dom_3"]
+        ):
+            count += 1
+            print(len(set(combinacao)), combinacao)
+            if len(set(combinacao)) == 7:
+                print("count: {}.".format(count))
+                combinacoes_nao_suficientes = False
+                break """
+        
+        
     
     def escalar_por_modalidade(self, _servico):
         modalidade = _servico.get_modalidade()
