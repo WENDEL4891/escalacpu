@@ -293,13 +293,6 @@ class EscalarSemana:
                     if 3 in turnos:
                         impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
 
-<<<<<<< HEAD
-               
-=======
-        for nome, data_turnos in impedimentos_por_militar_fds.items():
-            print(nome, data_turnos)
-            for data, turnos in data_turnos.items():
-                print(nome, data, turnos)
         
         #for i in impedimentos_por_dia_fds.items():
         #    print(i)
@@ -313,7 +306,6 @@ class EscalarSemana:
         
         
         
->>>>>>> 52c0c17725bb7b8443c1d67cd085a795f8004cab
         
 
         servico_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
@@ -385,6 +377,24 @@ class EscalarSemana:
 
             nomes_fila = [nome.nome_de_guerra for nome in self.gerenciador_de_filas.filas['fds'].fila if self.gerenciador_de_filas.filas['fds'].fila.index(nome) <= 6 + acrescimo]
 
+            
+            def qtd_impedimentos(nome):
+                impedimentos = self.impedimentos_por_militar[nome]
+                qtd = 0
+                for turnos in impedimentos.values():
+                    qtd += len(turnos)
+                return qtd
+            
+            nomes_fila.sort(key=qtd_impedimentos)
+                        
+            
+            print('-' * 40)
+            for n in nomes_fila:
+                print(n)
+            for i in self.impedimentos_por_militar.items():
+                print(i)
+            print('-' * 40)
+
                         
             impedimentos_fds_por_dia_turno = dict()
             for data, dict_turnos in self.impedimentos_por_dia.items():            
@@ -407,39 +417,53 @@ class EscalarSemana:
                 combinacao = list()
                 combinacao.append(nome_sex_3)                
                 for nome_sab_1 in nomes_disponiveis_por_dia_turno_fds["sab_1"]:
+                    if len(combinacao) != 1:
+                        return combinacoes
                     if nome_sab_1 in combinacao:
                         continue
                     combinacao.append(nome_sab_1)
                     for nome_sab_2 in nomes_disponiveis_por_dia_turno_fds["sab_2"]:
+                        if len(combinacao) != 2:
+                            return combinacoes
                         if nome_sab_2 in combinacao:
                             continue
                         combinacao.append(nome_sab_2)
                         for nome_sab_3 in nomes_disponiveis_por_dia_turno_fds["sab_3"]:
+                            if len(combinacao) != 3:
+                                return combinacoes
                             if nome_sab_3 in combinacao:
                                 continue
                             combinacao.append(nome_sab_3)
                             for nome_dom_1 in nomes_disponiveis_por_dia_turno_fds["dom_1"]: 
+                                if len(combinacao) != 4:
+                                    return combinacoes
                                 if nome_dom_1 in combinacao:
                                     continue
                                 combinacao.append(nome_dom_1)
                                 for nome_dom_2 in nomes_disponiveis_por_dia_turno_fds["dom_2"]:             
+                                    if len(combinacao) != 5:
+                                        return combinacoes
                                     if nome_dom_2 in combinacao:
                                         continue
                                     combinacao.append(nome_dom_2)
                                     for nome_dom_3 in nomes_disponiveis_por_dia_turno_fds["dom_3"]:                         
+                                        if len(combinacao) != 6:
+                                            return combinacoes
                                         if nome_dom_3 in combinacao:
                                             continue
                                         combinacao.append(nome_dom_3)
                                         if len(combinacao) == 7:
                                             combinacoes.append(combinacao)
-                                        for c in combinacoes:
-                                            print(c)
-                                            
+                                        else:
+                                            return combinacoes
             return combinacoes
         
                
         total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
         nomes_fds = get_nomes_por_dia_turno_fds()
+        for n in nomes_fds.items():
+            print(n)    
+        print('-' * 40)
         combinacoes = get_combinacoes(nomes_fds)
         acrescimo = 0
         while len(combinacoes) == 0:
@@ -447,8 +471,9 @@ class EscalarSemana:
             nomes_fds = get_nomes_por_dia_turno_fds(acrescimo)
             combinacoes = get_combinacoes(nomes_fds)
                 
-        
-        return combinacoes
+        print('acréscimo: {}'.format(acrescimo))
+        print(self.gerenciador_de_filas.filas['fds'])
+        return nomes_fds
 
 
         
