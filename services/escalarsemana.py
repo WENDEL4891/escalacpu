@@ -8,6 +8,7 @@ import sys
 import myexceptions
 import pprint
 import itertools
+import functools
 
 class EscalarSemana:
 
@@ -368,29 +369,49 @@ class EscalarSemana:
         #print(self.gerenciador_de_filas.filas['fds'])
     
     
-    def get_nomes_fds(self):
+    def get_nomes_fds(self, qtd_nomes=7):
+        '''
+            Retorna os nomes para serem empregados no fim de semana.
+        '''
+        fila_fds_nome = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
         
-        def get_nomes_por_dia_turno_fds(acrescimo=0):
-            total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
-            if 6 + acrescimo > total_membros_fila_fds - 1:
+        def get_nomes_por_dia_turno_fds(substituicao=0):
+            total_membros_fila_fds = len(fila_fds_nome)
+            
+            if 6 + substituicao > total_membros_fila_fds - 1:
+                print('subs', substituicao)
                 raise myexceptions.LogicException('Há apenas {} nomes na fila de fds. Não há membro de índice {} ou superior.'.format(total_membros_fila_fds, total_membros_fila_fds))
 
-            nomes_fila = [nome.nome_de_guerra for nome in self.gerenciador_de_filas.filas['fds'].fila if self.gerenciador_de_filas.filas['fds'].fila.index(nome) <= 6 + acrescimo]
+            nomes_selecionados_fds = list(filter(lambda nome: fila_fds_nome.index(nome) < qtd_nomes, fila_fds_nome))
 
             
             def qtd_impedimentos(nome):
+                '''
+                Retorna a quantidade de impedimentos que o nome possui, de acordo com o atributo self.impediementos_por_militar.
+                '''
                 impedimentos = self.impedimentos_por_militar[nome]
                 qtd = 0
                 for turnos in impedimentos.values():
                     qtd += len(turnos)
-                return qtd
-            
-            nomes_fila.sort(key=qtd_impedimentos)
+                return qtd            
+
+
+            def get_ordem_fila_fds(nome):
+                '''
+                Retorna a ordem em que o nome está, na fila de fds, obtida pela estrutura self.gerenciador_de_filas.filas['fds']
+                '''                
+                return fila_fds_nome.index(nome)
+
+            if substituicao != 0:
+                nomes_selecionados_fds.sort(key=lambda nome: (qtd_impedimentos(nome), get_ordem_fila_fds(nome)))
+
+                nomes_selecionados_fds.pop(-1)
+                nomes_selecionados_fds.append(fila_fds_nome[6 + substituicao])
                         
             
             print('-' * 40)
-            for n in nomes_fila:
-                print(n)
+            for n in nomes_selecionados_fds:
+                print('{}, qtd_imp: {}, ordem_fila: {}'.format(n, qtd_impedimentos(n), get_ordem_fila_fds(n)))
             for i in self.impedimentos_por_militar.items():
                 print(i)
             print('-' * 40)
@@ -407,7 +428,7 @@ class EscalarSemana:
                         impedimentos_fds_por_dia_turno['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
                         
             nomes_disponiveis_por_dia_turno_fds = {
-                dia_turno:list(set(nomes_fila) - set(nomes)) for dia_turno, nomes in impedimentos_fds_por_dia_turno.items()
+                dia_turno:list(set(nomes_selecionados_fds) - set(nomes)) for dia_turno, nomes in impedimentos_fds_por_dia_turno.items()
             }
             return nomes_disponiveis_por_dia_turno_fds
                 
@@ -465,13 +486,13 @@ class EscalarSemana:
             print(n)    
         print('-' * 40)
         combinacoes = get_combinacoes(nomes_fds)
-        acrescimo = 0
+        substituicao = 0
         while len(combinacoes) == 0:
-            acrescimo += 1
-            nomes_fds = get_nomes_por_dia_turno_fds(acrescimo)
+            substituicao += 1
+            nomes_fds = get_nomes_por_dia_turno_fds(substituicao)
             combinacoes = get_combinacoes(nomes_fds)
                 
-        print('acréscimo: {}'.format(acrescimo))
+        print('substituição: {}'.format(substituicao))
         print(self.gerenciador_de_filas.filas['fds'])
         return nomes_fds
 
