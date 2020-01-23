@@ -105,12 +105,14 @@ class EscalarSemana:
         if escalar_tm:
             logs_escalar_militares_tm = self.escalar_militares_tm()
         
-        self.escalar_fds()
-    
+
         #pp = pprint.PrettyPrinter(indent=4)
 
         #for mens in logs_escalar_militares_tm.items():
         #    pp.pprint(mens)
+        
+        self.escalar_fds()
+    
         
         servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
         servicos_para_completar_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_para_completar_list))
@@ -347,71 +349,37 @@ class EscalarSemana:
                         impedimentos_por_dia_turno_fds['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
                         
             nomes_disponiveis_por_dia_turno_fds = {
-                dia_turno:list(set(nomes_selecionados_fds) - set(nomes)) for dia_turno, nomes in impedimentos_por_dia_turno_fds.items()
+                dia_turno:list(set(nomes_selecionados_fds) - set(nomes)) for dia_turno, nomes in impedimentos_por_dia_turno_fds.items() if dia_turno in list(map(lambda _servico: "{}_{}".format(config.dias_da_semana[_servico.data.weekday()], _servico.turno), self.servicos_para_completar_list))
             }
+            
             return nomes_disponiveis_por_dia_turno_fds
                 
         def get_combinacoes(nomes_disponiveis_por_dia_turno_fds):
-            servicos_para_completar_modalidades = list(map(
-                lambda _servico: "{}_{}".format(config.dias_da_semana[_servico.data.weekday()], _servico.turno), self.servicos_para_completar_list
-            ))
-            
+           
+            dias_turnos_para_completar_list = list(nomes_disponiveis_por_dia_turno_fds)            
+            qtd_dias_turno_para_completar = len(dias_turnos_para_completar_list)
+
             combinacoes = list()
+            for i in range(qtd_dias_turno_para_completar):
+                if i == 1:
+                    combinacao = list()
+                for nome in nomes_disponiveis_por_dia_turno_fds[dias_turnos_para_completar_list[i]]:
+                    
+                    
+
+                for nomes in nomes_disponiveis_por_dia_turno_fds[dias_turnos_para_completar_list[i]]:
 
             
-            for modalidade, nomes in nomes_disponiveis_por_dia_turno_fds.items():
-                if modalidade not in servicos_para_completar_modalidades:
-                    continue
-                if modalidade == servicos_para_completar_modalidades[0]:
+            """  for modalidade, nomes in nomes_disponiveis_por_dia_turno_fds.items():
+                if 'combinacao' not in locals():
                     combinacao = list()
-                
-                
-                combinacao_list = list()
+                   
+
                 print(modalidade, nomes)
-            print('#' * 40)
-            for nome_sex_3 in nomes_disponiveis_por_dia_turno_fds["sex_3"]:                
-                combinacao = list()
-                combinacao.append(nome_sex_3)                
-                for nome_sab_1 in nomes_disponiveis_por_dia_turno_fds["sab_1"]:
-                    if len(combinacao) != 1:
-                        return combinacoes
-                    if nome_sab_1 in combinacao:
-                        continue
-                    combinacao.append(nome_sab_1)
-                    for nome_sab_2 in nomes_disponiveis_por_dia_turno_fds["sab_2"]:
-                        if len(combinacao) != 2:
-                            return combinacoes
-                        if nome_sab_2 in combinacao:
-                            continue
-                        combinacao.append(nome_sab_2)
-                        for nome_sab_3 in nomes_disponiveis_por_dia_turno_fds["sab_3"]:
-                            if len(combinacao) != 3:
-                                return combinacoes
-                            if nome_sab_3 in combinacao:
-                                continue
-                            combinacao.append(nome_sab_3)
-                            for nome_dom_1 in nomes_disponiveis_por_dia_turno_fds["dom_1"]: 
-                                if len(combinacao) != 4:
-                                    return combinacoes
-                                if nome_dom_1 in combinacao:
-                                    continue
-                                combinacao.append(nome_dom_1)
-                                for nome_dom_2 in nomes_disponiveis_por_dia_turno_fds["dom_2"]:             
-                                    if len(combinacao) != 5:
-                                        return combinacoes
-                                    if nome_dom_2 in combinacao:
-                                        continue
-                                    combinacao.append(nome_dom_2)
-                                    for nome_dom_3 in nomes_disponiveis_por_dia_turno_fds["dom_3"]:                         
-                                        if len(combinacao) != 6:
-                                            return combinacoes
-                                        if nome_dom_3 in combinacao:
-                                            continue
-                                        combinacao.append(nome_dom_3)
-                                        if len(combinacao) == 7:
-                                            combinacoes.append(combinacao)
-                                        else:
-                                            return combinacoes
+                
+            print('#' * 40) """
+
+            
             return combinacoes
         
                
