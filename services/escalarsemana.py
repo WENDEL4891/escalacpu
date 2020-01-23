@@ -275,116 +275,43 @@ class EscalarSemana:
         return logs_escalar_militares_tm
     
     def escalar_fds(self):
-        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
-        qtd_servicos_fds_para_completar = len(servicos_para_completar_fds)
 
-        
+        #impedimentos_por_militar_fds = dict()
+        #for nome_de_guerra, datas in self.impedimentos_por_militar.items():
+        #    impedimentos_por_militar_fds[nome_de_guerra] = dict()
+        #    for data, turnos in datas.items():
+        #        if data.weekday() in (5, 6):
+        #            impedimentos_por_militar_fds[nome_de_guerra][data] = turnos
+        #        if data.weekday() == 4:
+        #            if 3 in turnos:
+        #                impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
+                
+              
+       
         nomes_combinacoes = self.get_nomes_fds()
         #for n in nomes_combinacoes:
         #    print(n)        
-        
-
-        impedimentos_por_militar_fds = dict()
-        for nome_de_guerra, datas in self.impedimentos_por_militar.items():
-            impedimentos_por_militar_fds[nome_de_guerra] = dict()
-            for data, turnos in datas.items():
-                if data.weekday() in (5, 6):
-                    impedimentos_por_militar_fds[nome_de_guerra][data] = turnos
-                if data.weekday() == 4:
-                    if 3 in turnos:
-                        impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
-
-        
-        #for i in impedimentos_por_dia_fds.items():
-        #    print(i)
-        #print(self.gerenciador_de_filas.filas['qui_3'])
-
-        
-        
-                
-                
-
-        
-        
-        
-        
-
-        servico_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
-        if len(servico_para_completar_sab_3):
-            sab_3 = servico_para_completar_sab_3[0]
-            self.gerenciador_de_filas.filas['fds'].fila.sort(
-                key = lambda _cpu: (
-                    max(list(map(self.gerenciador_de_filas.number_week_and_year, _cpu.servicos_fds))) if len(_cpu.servicos_fds) else 0,
-                    _cpu.get_fds_em_sequencia(),
-                    self.gerenciador_de_filas.filas['sab_3'].fila.index(_cpu),
-                    max(list(map(lambda _servico: _servico, _cpu.servicos_fds))) if len(_cpu.servicos_fds) else 0
-                )
-            )
-        
-            #print(self.gerenciador_de_filas.filas['fds'])
-        
-        
-                
-        #servicos_para_completar_fds.sort(
-        #    key = lambda _servico: (
-        #        _servico.get_ordem_prioridade_fds_para_empenhar(),
-        #        _servico.data
-        #    )
-        #)
-
-        #cpus_empenhos_fds = list()
-        #for _cpu in self.gerenciador_de_filas.filas['fds'].fila:
-        #    cond1 = _cpu.nome_de_guerra not in self.impedimentos[self.data_sexta]
-        #    cond2 = _cpu.nome_de_guerra not in self.impedimentos[self.data_sabado]
-        #    cond3 = _cpu.nome_de_guerra not in self.impedimentos[self.data_domingo]
-
-         #   if cond1 or cond2 or cond3:                
-         #       cpus_empenhos_fds.append(_cpu)
-         #   if len(cpus_empenhos_fds) == 7:
-         #       break
-        
-        #for i in self.impedimentos.items():
-        #    print(i)
-        
-        
-        
-        #for _servico in self.servicos_para_completar_list:
-        #    print(_servico)
-        #print('-' * 40 + '\n')
-
-        #for _servico in self.servicos_completos_list:
-        #    print(_servico)
-        #print('-' * 40 + '\n')
-        #
-
-        #print('não completos: {}'.format(len(self.servicos_para_completar_list)))
-        #print('completos: {}'.format(len(self.servicos_completos_list)))
-
-
-        
-        
-        #for _servico in self.servicos_para_completar_list:            
-        #    self.escalar_por_modalidade(_servico)
-                
+    
+    def get_nomes_fds(self):
+        '''
+            Retorna os nomes para serem empregados no fim de semana. Usa duas funções declaradas dentro do próprio método.
+        '''
         #print(self.gerenciador_de_filas.filas['fds'])
-    
-    
-    def get_nomes_fds(self, qtd_nomes=7):
-        '''
-            Retorna os nomes para serem empregados no fim de semana.
-        '''
-        fila_fds_nome = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
         
-        def get_nomes_por_dia_turno_fds(substituicao=0):
-            total_membros_fila_fds = len(fila_fds_nome)
-            
-            if 6 + substituicao > total_membros_fila_fds - 1:
+        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
+        modalidades_para_completar_fds = list(map(lambda _servico: _servico.get_modalidade(), servicos_para_completar_fds))
+        qtd_servicos_para_completar_fds = len(servicos_para_completar_fds)
+        
+        fila_fds_nome = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
+        total_membros_fila_fds = len(fila_fds_nome)
+        
+        def get_nomes_por_dia_turno_fds(substituicao=0):            
+            if qtd_servicos_para_completar_fds + substituicao > total_membros_fila_fds:
                 print('subs', substituicao)
                 raise myexceptions.LogicException('Há apenas {} nomes na fila de fds. Não há membro de índice {} ou superior.'.format(total_membros_fila_fds, total_membros_fila_fds))
 
-            nomes_selecionados_fds = list(filter(lambda nome: fila_fds_nome.index(nome) < qtd_nomes, fila_fds_nome))
-
-            
+            nomes_selecionados_fds = list(filter(lambda nome: fila_fds_nome.index(nome) < qtd_servicos_para_completar_fds, fila_fds_nome))
+                        
             def qtd_impedimentos(nome):
                 '''
                 Retorna a quantidade de impedimentos que o nome possui, de acordo com o atributo self.impediementos_por_militar.
@@ -406,34 +333,42 @@ class EscalarSemana:
                 nomes_selecionados_fds.sort(key=lambda nome: (qtd_impedimentos(nome), get_ordem_fila_fds(nome)))
 
                 nomes_selecionados_fds.pop(-1)
-                nomes_selecionados_fds.append(fila_fds_nome[6 + substituicao])
+                nomes_selecionados_fds.append(fila_fds_nome[qtd_servicos_para_completar_fds -1 + substituicao])
                         
-            
-            print('-' * 40)
-            for n in nomes_selecionados_fds:
-                print('{}, qtd_imp: {}, ordem_fila: {}'.format(n, qtd_impedimentos(n), get_ordem_fila_fds(n)))
-            for i in self.impedimentos_por_militar.items():
-                print(i)
-            print('-' * 40)
-
-                        
-            impedimentos_fds_por_dia_turno = dict()
+                                  
+            impedimentos_por_dia_turno_fds = dict()
             for data, dict_turnos in self.impedimentos_por_dia.items():            
                 if data.weekday() == 4:
                     for turno, nomes_de_guerra in dict_turnos.items():
                         if turno == 3:
-                            impedimentos_fds_por_dia_turno['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
+                            impedimentos_por_dia_turno_fds['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
                 if data.weekday() in (5, 6):
                     for turno, nomes_de_guerra in dict_turnos.items():
-                        impedimentos_fds_por_dia_turno['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
+                        impedimentos_por_dia_turno_fds['{}_{}'.format(config.dias_da_semana[data.weekday()], turno)] = nomes_de_guerra
                         
             nomes_disponiveis_por_dia_turno_fds = {
-                dia_turno:list(set(nomes_selecionados_fds) - set(nomes)) for dia_turno, nomes in impedimentos_fds_por_dia_turno.items()
+                dia_turno:list(set(nomes_selecionados_fds) - set(nomes)) for dia_turno, nomes in impedimentos_por_dia_turno_fds.items()
             }
             return nomes_disponiveis_por_dia_turno_fds
                 
         def get_combinacoes(nomes_disponiveis_por_dia_turno_fds):
-            combinacoes = list()            
+            servicos_para_completar_modalidades = list(map(
+                lambda _servico: "{}_{}".format(config.dias_da_semana[_servico.data.weekday()], _servico.turno), self.servicos_para_completar_list
+            ))
+            
+            combinacoes = list()
+
+            
+            for modalidade, nomes in nomes_disponiveis_por_dia_turno_fds.items():
+                if modalidade not in servicos_para_completar_modalidades:
+                    continue
+                if modalidade == servicos_para_completar_modalidades[0]:
+                    combinacao = list()
+                
+                
+                combinacao_list = list()
+                print(modalidade, nomes)
+            print('#' * 40)
             for nome_sex_3 in nomes_disponiveis_por_dia_turno_fds["sex_3"]:                
                 combinacao = list()
                 combinacao.append(nome_sex_3)                
@@ -482,9 +417,9 @@ class EscalarSemana:
                
         total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
         nomes_fds = get_nomes_por_dia_turno_fds()
-        for n in nomes_fds.items():
-            print(n)    
-        print('-' * 40)
+        #for n in nomes_fds.items():
+        #    print(n)    
+        #print('-' * 40)
         combinacoes = get_combinacoes(nomes_fds)
         substituicao = 0
         while len(combinacoes) == 0:
@@ -492,8 +427,8 @@ class EscalarSemana:
             nomes_fds = get_nomes_por_dia_turno_fds(substituicao)
             combinacoes = get_combinacoes(nomes_fds)
                 
-        print('substituição: {}'.format(substituicao))
-        print(self.gerenciador_de_filas.filas['fds'])
+        #print('substituição: {}'.format(substituicao))
+        #print(self.gerenciador_de_filas.filas['fds'])
         return nomes_fds
 
 

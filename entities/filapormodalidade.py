@@ -141,12 +141,12 @@ class FilaPorModalidade:
         for i in range(len(self.fila)):
             if self.modalidade == 'fds':
                 fila_str += '\t{:<2}: {:22} | Último serviço: {:10} | Serviços em sequência: {}\n'.format(
-                    i + 1,
+                    i,
                     self.fila[i].pg + " " + self.fila[i].nome_de_guerra,
                     datetime.datetime.strftime(max(self.fila[i].servicos_fds).data, '%d/%m/%Y') if len(self.fila[i].servicos_fds) else '---',
                     self.fila[i].get_fds_em_sequencia()
                 )
             else:
-                fila_str += '\t{:<2}: {:22}\n'.format(i + 1, self.fila[i].pg + " " + self.fila[i].nome_de_guerra)
+                fila_str += '\t{:<2}: {:22}\n'.format(i, self.fila[i].pg + " " + self.fila[i].nome_de_guerra)
         fila_str += '}'
         return fila_str
