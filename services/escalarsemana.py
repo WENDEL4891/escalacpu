@@ -290,29 +290,31 @@ class EscalarSemana:
                 
               
        
-        nomes_combinacoes = self.get_nomes_fds()
-        #for n in nomes_combinacoes:
-        #    print(n)        
+        print(self.gerenciador_de_filas.filas['fds'])
+        nomes_disponiveis_fds = self.get_nomes_fds()
+        
+        for n in nomes_disponiveis_fds.items():
+            print(n)
+        
     
     def get_nomes_fds(self):
         '''
             Retorna os nomes para serem empregados no fim de semana. Usa duas funções declaradas dentro do próprio método.
-        '''
-        #print(self.gerenciador_de_filas.filas['fds'])
+        '''        
         
-        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
-        modalidades_para_completar_fds = list(map(lambda _servico: _servico.get_modalidade(), servicos_para_completar_fds))
+        servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))        
         qtd_servicos_para_completar_fds = len(servicos_para_completar_fds)
         
-        fila_fds_nome = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
-        total_membros_fila_fds = len(fila_fds_nome)
         
-        def get_nomes_por_dia_turno_fds(substituicao=0):            
-            if qtd_servicos_para_completar_fds + substituicao > total_membros_fila_fds:
-                print('subs', substituicao)
-                raise myexceptions.LogicException('Há apenas {} nomes na fila de fds. Não há membro de índice {} ou superior.'.format(total_membros_fila_fds, total_membros_fila_fds))
+        def get_nomes_por_dia_turno_fds(retirar_1=False):            
+            
+            fila_fds_nomes = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
+            total_membros_fila_fds = len(fila_fds_nomes)
 
-            nomes_selecionados_fds = list(filter(lambda nome: fila_fds_nome.index(nome) < qtd_servicos_para_completar_fds, fila_fds_nome))
+            if len(fila_fds_nomes) < qtd_servicos_para_completar_fds:                
+                raise myexceptions.LogicException("Não é possível completar os serviços da semana com os militares disponíveis.")
+
+            nomes_selecionados_fds = list(filter(lambda nome: fila_fds_nomes.index(nome) < qtd_servicos_para_completar_fds, fila_fds_nomes))
                         
             def qtd_impedimentos(nome):
                 '''
@@ -329,13 +331,18 @@ class EscalarSemana:
                 '''
                 Retorna a ordem em que o nome está, na fila de fds, obtida pela estrutura self.gerenciador_de_filas.filas['fds']
                 '''                
-                return fila_fds_nome.index(nome)
+                return fila_fds_nomes.index(nome)
 
-            if substituicao != 0:
+            if retirar_1:
                 nomes_selecionados_fds.sort(key=lambda nome: (qtd_impedimentos(nome), get_ordem_fila_fds(nome)))
 
-                nomes_selecionados_fds.pop(-1)
-                nomes_selecionados_fds.append(fila_fds_nome[qtd_servicos_para_completar_fds -1 + substituicao])
+                nome_retirado = nomes_selecionados_fds.pop(-1)
+                self.gerenciador_de_filas.filas['fds'].fila.remove(cpudao.CpuDAO().get_cpu(nome_retirado))
+                fila_fds_nomes.remove(nome_retirado)
+                nomes_selecionados_fds.append(fila_fds_nomes[qtd_servicos_para_completar_fds -1])
+            for n in nomes_selecionados_fds:
+                print(n)
+            print('-'*10)
                         
                                   
             impedimentos_por_dia_turno_fds = dict()
@@ -354,49 +361,40 @@ class EscalarSemana:
             
             return nomes_disponiveis_por_dia_turno_fds
                 
-        def get_combinacoes(nomes_disponiveis_por_dia_turno_fds):
-           
-            dias_turnos_para_completar_list = list(nomes_disponiveis_por_dia_turno_fds)            
-            qtd_dias_turno_para_completar = len(dias_turnos_para_completar_list)
-
-            combinacoes = list()
-            for i in range(qtd_dias_turno_para_completar):
-                if i == 1:
-                    combinacao = list()
-                for nome in nomes_disponiveis_por_dia_turno_fds[dias_turnos_para_completar_list[i]]:
-                    
-                    
-
-                for nomes in nomes_disponiveis_por_dia_turno_fds[dias_turnos_para_completar_list[i]]:
-
+        def has_combinacoes(nomes_disponiveis_por_dia_turno_fds):            
             
-            """  for modalidade, nomes in nomes_disponiveis_por_dia_turno_fds.items():
-                if 'combinacao' not in locals():
-                    combinacao = list()
-                   
+            dias_turnos_list = list(nomes_disponiveis_por_dia_turno_fds)
+                       
+            for nomes in nomes_disponiveis_por_dia_turno_fds.items():
+                if not len(nomes):
+                    return False
 
-                print(modalidade, nomes)
+            for combinacao in itertools.product(
+                nomes_disponiveis_por_dia_turno_fds['sex_3'] if 'sex_3' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['sab_1'] if 'sab_1' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['sab_2'] if 'sab_2' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['sab_3'] if 'sab_3' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['dom_1'] if 'dom_1' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['dom_2'] if 'dom_2' in dias_turnos_list else ['aux'],
+                nomes_disponiveis_por_dia_turno_fds['dom_3'] if 'dom_3' in dias_turnos_list else ['aux'],
+
+            ):
+                combinacao_set = set(combinacao)
+                combinacao_set.discard('aux')                
+                if len(set(combinacao_set)) == qtd_servicos_para_completar_fds:
+                    return True
+            
+            return False
+
                 
-            print('#' * 40) """
-
-            
-            return combinacoes
+        nomes_fds = get_nomes_por_dia_turno_fds()      
         
-               
-        total_membros_fila_fds = len(self.gerenciador_de_filas.filas['fds'].fila)
-        nomes_fds = get_nomes_por_dia_turno_fds()
-        #for n in nomes_fds.items():
-        #    print(n)    
-        #print('-' * 40)
-        combinacoes = get_combinacoes(nomes_fds)
-        substituicao = 0
-        while len(combinacoes) == 0:
-            substituicao += 1
-            nomes_fds = get_nomes_por_dia_turno_fds(substituicao)
-            combinacoes = get_combinacoes(nomes_fds)
-                
-        #print('substituição: {}'.format(substituicao))
-        #print(self.gerenciador_de_filas.filas['fds'])
+        has_combinacoes_result = has_combinacoes(nomes_fds)
+        
+        while not has_combinacoes_result:            
+            nomes_fds = get_nomes_por_dia_turno_fds(retirar_1=True)
+            has_combinacoes_result = has_combinacoes(nomes_fds)            
+        
         return nomes_fds
 
 
