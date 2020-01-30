@@ -82,11 +82,7 @@ class EscalarSemana:
         for nome_de_guerra in nomes_de_guerra:
             impedimentos[nome_de_guerra] = dict()            
 
-        #for data in self.dias_e_turnos_seg_a_dom_dict.keys():
-        #    turnos = dict()
-        #    for i in range(1,4):
-        #        turnos[i] = list()
-        #    impedimentos[data] = turnos
+        
         for impedimento_obj in impedimentos_obj_list:
             data = impedimento_obj.data_inicio
             while data <= impedimento_obj.data_fim:                
@@ -99,7 +95,7 @@ class EscalarSemana:
         self.__impedimentos_por_militar = impedimentos
 
        
-    def escalar_seg_a_dom(self, escalar_tm=True):        
+    def escalar_seg_a_dom(self, escalar_tm=True):
 
 
         if escalar_tm:
@@ -112,36 +108,7 @@ class EscalarSemana:
         #    pp.pprint(mens)
         
         self.escalar_fds()
-    
-        
-        servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
-        servicos_para_completar_sem_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_12', self.servicos_para_completar_list))
-        servicos_para_completar_sem_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sem_3', self.servicos_para_completar_list))
-        servicos_para_completar_qua_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_2', self.servicos_para_completar_list))
-        servicos_para_completar_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', self.servicos_para_completar_list))
-        servicos_para_completar_sex_2 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_2', self.servicos_para_completar_list))
-        servicos_para_completar_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', self.servicos_para_completar_list))
-        servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', self.servicos_para_completar_list))
-        servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
-        servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', self.servicos_para_completar_list))
-
-               
-
-        
-        #servicos_para_completar_fds = list(filter(lambda _servico: _servico.is_weekend(), self.servicos_para_completar_list))
-        #servicos_para_completar_semana = list(filter(lambda _servico: not _servico.is_weekend(), self.servicos_para_completar_list))
-        #servicos_para_completar_seg_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_12', self.servicos_para_completar_list))
-        #servicos_para_completar_seg_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'seg_3', self.servicos_para_completar_list))
-        #servicos_para_completar_ter_qui_sex_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_qui_sex_12', self.servicos_para_completar_list))
-        #servicos_para_completar_qua_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_12', self.servicos_para_completar_list))
-        #servicos_para_completar_ter_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'ter_3', self.servicos_para_completar_list))
-        #servicos_para_completar_qua_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qua_3', self.servicos_para_completar_list))
-        #servicos_para_completar_qui_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'qui_3', self.servicos_para_completar_list))
-        #servicos_para_completar_sex_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sex_3', self.servicos_para_completar_list))
-        #servicos_para_completar_fds_12 = list(filter(lambda _servico: _servico.get_modalidade() == 'fds_12', self.servicos_para_completar_list))
-        #servicos_para_completar_sab_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'sab_3', self.servicos_para_completar_list))
-        #servicos_para_completar_dom_3 = list(filter(lambda _servico: _servico.get_modalidade() == 'dom_3', self.servicos_para_completar_list))
-        
+            
 
     def escalar_militares_tm(self):
         logs_escalar_militares_tm = dict()
@@ -276,28 +243,26 @@ class EscalarSemana:
         
         return logs_escalar_militares_tm
     
-    def escalar_fds(self):
 
-        #impedimentos_por_militar_fds = dict()
-        #for nome_de_guerra, datas in self.impedimentos_por_militar.items():
-        #    impedimentos_por_militar_fds[nome_de_guerra] = dict()
-        #    for data, turnos in datas.items():
-        #        if data.weekday() in (5, 6):
-        #            impedimentos_por_militar_fds[nome_de_guerra][data] = turnos
-        #        if data.weekday() == 4:
-        #            if 3 in turnos:
-        #                impedimentos_por_militar_fds[nome_de_guerra][data] = [3]
+    def escalar_fds(self):
                 
-              
-       
-        print(self.gerenciador_de_filas.filas['fds'])
-        nomes_disponiveis_fds = self.get_nomes_fds()
+        nomes_disponiveis_fds_em_combinacoes_validas_dicts = self.get_nomes_fds_em_combinacoes_validas()
         
-        for n in nomes_disponiveis_fds.items():
-            print(n)
+        sab_3_list = [combinacao['sab_3'] for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts]
+        sab_3_list = list(set(sab_3_list))       
         
+                
+        for _cpu in self.gerenciador_de_filas.filas['sab_3'].fila:
+            if _cpu.nome_de_guerra in sab_3_list:
+                sab_3 = _cpu.nome_de_guerra
+                break
+        
+        nomes_disponiveis_fds_em_combinacoes_validas_dicts = list(filter(lambda combinacao: combinacao['sab_3'] == sab_3, nomes_disponiveis_fds_em_combinacoes_validas_dicts))
+
+        for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts:
+            print(combinacao)
     
-    def get_nomes_fds(self):
+    def get_nomes_fds_em_combinacoes_validas(self):
         '''
             Retorna os nomes para serem empregados no fim de semana. Usa duas funções declaradas dentro do próprio método.
         '''        
@@ -306,7 +271,10 @@ class EscalarSemana:
         qtd_servicos_para_completar_fds = len(servicos_para_completar_fds)
         
         
-        def get_nomes_por_dia_turno_fds(retirar_1=False):            
+        def get_nomes_por_dia_turno_fds(retirar_1=False):
+            '''
+            Obtém os nomes, buscando na fila de fim de semana, na quantidade necessária, de acordo com a quantidade de serviços que precisam ser completados.
+            '''
             
             fila_fds_nomes = list(map(lambda _cpu: _cpu.nome_de_guerra, self.gerenciador_de_filas.filas['fds'].fila))
             total_membros_fila_fds = len(fila_fds_nomes)
@@ -319,6 +287,8 @@ class EscalarSemana:
             def qtd_impedimentos(nome):
                 '''
                 Retorna a quantidade de impedimentos que o nome possui, de acordo com o atributo self.impediementos_por_militar.
+                A função é usada para ordenar os nomes disponíveis, quando é necessário tirar um da fila.
+                O nome que tiver mais impedimentos deve ficar no final da lista, para ser substituído.
                 '''
                 impedimentos = self.impedimentos_por_militar[nome]
                 qtd = 0
@@ -329,20 +299,20 @@ class EscalarSemana:
 
             def get_ordem_fila_fds(nome):
                 '''
-                Retorna a ordem em que o nome está, na fila de fds, obtida pela estrutura self.gerenciador_de_filas.filas['fds']
+                Retorna a ordem em que o nome está, na fila de fds, obtida pela estrutura self.gerenciador_de_filas.filas['fds'].
+                A função é usada para ordenar os nomes disponíveis, quando é necessário tirar um da fila.
+                O primeiro critério de ordenação é a quantidade de impediementos.
+                A ordem na fila é o segundo critério, pois, dentre os militares com a mesma quantidade de impedimentos, deve ser substituído aquele que tem maior ordem na fila. Ou seja, que estaria mais longe de ser escalado.
                 '''                
                 return fila_fds_nomes.index(nome)
 
             if retirar_1:
-                nomes_selecionados_fds.sort(key=lambda nome: (qtd_impedimentos(nome), get_ordem_fila_fds(nome)))
+                nomes_selecionados_fds.sort(key=lambda nome: (qtd_impedimentos(nome), get_ordem_fila_fds(nome)))                
 
                 nome_retirado = nomes_selecionados_fds.pop(-1)
                 self.gerenciador_de_filas.filas['fds'].fila.remove(cpudao.CpuDAO().get_cpu(nome_retirado))
                 fila_fds_nomes.remove(nome_retirado)
-                nomes_selecionados_fds.append(fila_fds_nomes[qtd_servicos_para_completar_fds -1])
-            for n in nomes_selecionados_fds:
-                print(n)
-            print('-'*10)
+                nomes_selecionados_fds.append(fila_fds_nomes[qtd_servicos_para_completar_fds -1])            
                         
                                   
             impedimentos_por_dia_turno_fds = dict()
@@ -361,15 +331,17 @@ class EscalarSemana:
             
             return nomes_disponiveis_por_dia_turno_fds
                 
-        def has_combinacoes(nomes_disponiveis_por_dia_turno_fds):            
+        def get_combinacoes(nomes_disponiveis_por_dia_turno_fds):            
             
             dias_turnos_list = list(nomes_disponiveis_por_dia_turno_fds)
                        
+            combinacoes_validas_list = list()
+
             for nomes in nomes_disponiveis_por_dia_turno_fds.items():
                 if not len(nomes):
-                    return False
+                    return combinacoes_validas_list
 
-            for combinacao in itertools.product(
+            combinacoes_possiveis = itertools.product(
                 nomes_disponiveis_por_dia_turno_fds['sex_3'] if 'sex_3' in dias_turnos_list else ['aux'],
                 nomes_disponiveis_por_dia_turno_fds['sab_1'] if 'sab_1' in dias_turnos_list else ['aux'],
                 nomes_disponiveis_por_dia_turno_fds['sab_2'] if 'sab_2' in dias_turnos_list else ['aux'],
@@ -378,48 +350,39 @@ class EscalarSemana:
                 nomes_disponiveis_por_dia_turno_fds['dom_2'] if 'dom_2' in dias_turnos_list else ['aux'],
                 nomes_disponiveis_por_dia_turno_fds['dom_3'] if 'dom_3' in dias_turnos_list else ['aux'],
 
-            ):
-                combinacao_set = set(combinacao)
-                combinacao_set.discard('aux')                
-                if len(set(combinacao_set)) == qtd_servicos_para_completar_fds:
-                    return True
+            )            
+            dias_turnos_ordenados = ['sex_3', 'sab_1', 'sab_2', 'sab_3', 'dom_1', 'dom_2', 'dom_3']
+            for dia_turno in dias_turnos_ordenados:
+                if dia_turno not in dias_turnos_list:
+                    dias_turnos_ordenados.remove(dia_turno)
             
-            return False
+            for combinacao in combinacoes_possiveis:
+                combinacao_list = list(combinacao)                                
+                for nome in combinacao_list:
+                    if nome == 'aux':
+                        combinacao_list.remove(nome)                        
+
+                combinacao_set = set(combinacao_list)
+                
+                if len(set(combinacao_set)) == qtd_servicos_para_completar_fds:
+                    combinacao_valida = dict()
+                    for i in range(len(combinacao_list)):
+                        combinacao_valida[dias_turnos_ordenados[i]] = combinacao_list[i]
+                    combinacoes_validas_list.append(combinacao_valida)
+                        
+            return combinacoes_validas_list
 
                 
         nomes_fds = get_nomes_por_dia_turno_fds()      
         
-        has_combinacoes_result = has_combinacoes(nomes_fds)
+        combinacoes_validas_list = get_combinacoes(nomes_fds)
         
-        while not has_combinacoes_result:            
+        while len(combinacoes_validas_list) == 0:            
             nomes_fds = get_nomes_por_dia_turno_fds(retirar_1=True)
-            has_combinacoes_result = has_combinacoes(nomes_fds)            
+            combinacoes_validas_list = get_combinacoes(nomes_fds)            
         
-        return nomes_fds
-
-
-        
-        
-        
-        
-        """ count = 0
-        for combinacao in itertools.product(
-            nomes_disponiveis_por_dia_turno["sex_3"],
-            nomes_disponiveis_por_dia_turno["sab_1"],
-            nomes_disponiveis_por_dia_turno["sab_2"],
-            nomes_disponiveis_por_dia_turno["sab_3"],
-            nomes_disponiveis_por_dia_turno["dom_1"],
-            nomes_disponiveis_por_dia_turno["dom_2"],
-            nomes_disponiveis_por_dia_turno["dom_3"]
-        ):
-            count += 1
-            print(len(set(combinacao)), combinacao)
-            if len(set(combinacao)) == 7:
-                print("count: {}.".format(count))
-                combinacoes_nao_suficientes = False
-                break """
-        
-        
+        return combinacoes_validas_list
+               
     
     def escalar_por_modalidade(self, _servico):
         modalidade = _servico.get_modalidade()
@@ -433,7 +396,7 @@ class EscalarSemana:
         _servico.cpu = next
         servicodao.ServicoDAO().servico_add(_servico=_servico)
     
-    def escalar_por_modalidade_fds(self, _servico):        
+    def escalar_por_modalidade_fds(self, _servico):
         _pula = 0
         next = self.gerenciador_de_filas.filas['fds'].show_next_membro(pula=_pula)
         while next.nome_de_guerra in self.impedimentos[_servico.data]:
