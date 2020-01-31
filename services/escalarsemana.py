@@ -107,7 +107,16 @@ class EscalarSemana:
         #for mens in logs_escalar_militares_tm.items():
         #    pp.pprint(mens)
         
+        #print(self.gerenciador_de_filas.filas['fds'])
+        #print(self.gerenciador_de_filas.filas['sab_3'])
+        #print(self.gerenciador_de_filas.filas['dom_3'])
+
+        #print(self.gerenciador_de_filas.filas['sex_3'])
+        #print(self.gerenciador_de_filas.filas['dom_3'])
+        #print(self.gerenciador_de_filas.filas['fds_12'])
+        
         self.escalar_fds()
+        #JÁ ESTÁ DEFININDO OS EMPENHOS EM UM DICIONÁRIO. AGORA, BASTA INSERIR NO BANCO DE DADOS
             
 
     def escalar_militares_tm(self):
@@ -247,20 +256,59 @@ class EscalarSemana:
     def escalar_fds(self):
                 
         nomes_disponiveis_fds_em_combinacoes_validas_dicts = self.get_nomes_fds_em_combinacoes_validas()
-        
-        sab_3_list = [combinacao['sab_3'] for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts]
-        sab_3_list = list(set(sab_3_list))       
-        
-                
-        for _cpu in self.gerenciador_de_filas.filas['sab_3'].fila:
-            if _cpu.nome_de_guerra in sab_3_list:
-                sab_3 = _cpu.nome_de_guerra
-                break
-        
-        nomes_disponiveis_fds_em_combinacoes_validas_dicts = list(filter(lambda combinacao: combinacao['sab_3'] == sab_3, nomes_disponiveis_fds_em_combinacoes_validas_dicts))
+        combinacao_possivel = nomes_disponiveis_fds_em_combinacoes_validas_dicts[0]
 
+        def escalar_fds_por_dia_turno(
+            dia_turno,
+            nomes_disponiveis_fds_em_combinacoes_validas_dicts,
+            combinacao_possivel
+        ):
+                        
+            if dia_turno in ('sex_3', 'sab_3', 'dom_3'):
+                modalidade = dia_turno
+            elif dia_turno in ('sab_1', 'sab_2', 'dom_1', 'dom_2'):
+                modalidade = 'fds_12'
+            else:
+                raise myexceptions.LogicException(
+                'O o argumento passado não é válido, nesse contexto. A parâmetro dia_turno só recebe algum, dentre os valores: {}.'.format(
+                        ', '.join(['sex_3', 'sab_1', 'sab_2', 'sab_3', 'dom_1', 'dom_2', 'dom_3'])
+                    )
+            )
+                                        
+            if dia_turno in combinacao_possivel:
+                dia_turno_list = [combinacao[dia_turno] for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts]
+                dia_turno_list = list(set(dia_turno_list))       
+                for _cpu in self.gerenciador_de_filas.filas[modalidade].fila:
+                    if _cpu.nome_de_guerra in dia_turno_list:
+                        nome_dia_turno = _cpu.nome_de_guerra                                                
+                        nova_lista_nomes_disponiveis_fds_em_combinacoes_validas_dicts = list(filter(lambda combinacao: combinacao[dia_turno] == nome_dia_turno, nomes_disponiveis_fds_em_combinacoes_validas_dicts))
+                        nova_lista_nomes_disponiveis_fds_em_combinacoes_validas_dicts.sort(key=lambda combinacao: combinacao[list(combinacao)[0]])
+                                                
+                        while nova_lista_nomes_disponiveis_fds_em_combinacoes_validas_dicts != nomes_disponiveis_fds_em_combinacoes_validas_dicts:
+                            for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts:
+                                if combinacao not in nova_lista_nomes_disponiveis_fds_em_combinacoes_validas_dicts:
+                                    nomes_disponiveis_fds_em_combinacoes_validas_dicts.remove(combinacao)
+                            nomes_disponiveis_fds_em_combinacoes_validas_dicts.sort(key=lambda combinacao: combinacao[list(combinacao)[0]])
+                        break
+
+            
+        # Esta ordem é que será seguida, na atribuição de empenhos
+        dias_turnos_ordenados = ['sab_3', 'dom_3', 'sex_3', 'sab_1', 'sab_2', 'dom_1', 'dom_2']
+        
+        for dia_turno in dias_turnos_ordenados:
+            if dia_turno not in combinacao_possivel:
+                dias_turnos_ordenados.remove(dia_turno)
+       
+        for dia_turno in dias_turnos_ordenados:
+            escalar_fds_por_dia_turno(
+                dia_turno,
+                nomes_disponiveis_fds_em_combinacoes_validas_dicts,
+                combinacao_possivel
+            )
+        
         for combinacao in nomes_disponiveis_fds_em_combinacoes_validas_dicts:
             print(combinacao)
+
     
     def get_nomes_fds_em_combinacoes_validas(self):
         '''
